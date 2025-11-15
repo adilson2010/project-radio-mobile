@@ -4,3 +4,5 @@ env.
 public/
 *.log
 *.deploy-hosgator.md
+
+env.local
