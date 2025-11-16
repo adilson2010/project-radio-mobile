@@ -602,7 +602,7 @@ export default function RadioPlayer() {
             <button 
               onClick={() => {
                 const shareData = {
-                  title: 'Ras Reggae Radio - Ao Vivo',
+                  title: 'Estou ouvindo Ras Reggae Radio - Ao Vivo',
                   text: 'Escutando a melhor rádio reggae online!',
                   url: window.location.href
                 };

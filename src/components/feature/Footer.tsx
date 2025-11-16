@@ -52,7 +52,7 @@ export default function Footer() {
             </div>
             <p className="text-yellow-100 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
               Desde 2010 espalhando amor, paz e unidade através da música reggae. 
-              Transmissão 24/7 com a melhor seleção musical.
+              Transmissão 24 horas com a melhor seleção musical.
             </p>
           </div>
 
@@ -64,10 +64,10 @@ export default function Footer() {
             </h4>
             <p className="text-yellow-100 text-sm leading-relaxed mb-4">
               Desde 2010, a Ras Reggae Radio tem sido a voz autêntica do reggae no Brasil e no mundo. 
-              Nossa missão é espalhar a mensagem de amor, paz e unidade através da música reggae.
+              Nossa missão é espalhar a mensagem de amor, paz e humildade através da música reggae.
             </p>
             <p className="text-yellow-100 text-sm leading-relaxed">
-              Com uma programação cuidadosamente selecionada, apresentamos desde os clássicos atemporais 
+              Com uma programação cuidadosamente selecionada, apresentamos desde os clássicos das decadas passadas 70,80,90 e anos atuais 2000, 
               até os novos talentos do reggae contemporâneo.
             </p>
           </div>
@@ -137,11 +137,11 @@ export default function Footer() {
               </h4>
               <div className="space-y-3">
                 <a 
-                  href="mailto:contato@rasreggaeradio.com"
+                  href="#home"
                   className="text-yellow-100 hover:text-white transition-colors text-sm flex items-center space-x-2 justify-center md:justify-start"
                 >
                   <i className="ri-mail-line w-4 h-4 flex items-center justify-center"></i>
-                  <span>contato@rasreggaeradio.com</span>
+                  <span>no-reply@rasreggaeradio.com</span>
                 </a>
                 <a 
                   href="https://wa.me/5511999999999"
@@ -150,7 +150,7 @@ export default function Footer() {
                   className="text-yellow-100 hover:text-white transition-colors text-sm flex items-center space-x-2 justify-center md:justify-start"
                 >
                   <i className="ri-whatsapp-line w-4 h-4 flex items-center justify-center"></i>
-                  <span>(11) 99999-9999</span>
+                  <span>(00) 99999-9999</span>
                 </a>
               </div>
             </div>
@@ -190,7 +190,7 @@ export default function Footer() {
                   <i className="ri-twitter-line text-2xl"></i>
                 </a>
                 <a 
-                  href="https://youtube.com/rasreggaeradio"
+                  href="https://youtube.com/radiorasreggae"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-yellow-100 hover:text-white transition-colors transform hover:scale-110"
@@ -214,7 +214,7 @@ export default function Footer() {
                 </div>
                 <div className="flex items-center space-x-2 justify-center md:justify-start">
                   <i className="ri-time-line w-4 h-4 flex items-center justify-center"></i>
-                  <span>Online 24/7</span>
+                  <span>Online 24 horas</span>
                 </div>
                 <div className="flex items-center space-x-2 justify-center md:justify-start">
                   <i className="ri-global-line w-4 h-4 flex items-center justify-center"></i>
@@ -234,12 +234,12 @@ export default function Footer() {
             <div className="flex items-center space-x-6">
               <span className="text-yellow-100 text-sm">Desde 2010 • Amor • Paz • Reggae</span>
               <a 
-                href="https://readdy.ai/?origin=logo"
+                href="#"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-yellow-200 hover:text-white text-sm font-semibold transition-colors"
               >
-                Powered by Readdy
+                Powered by Restisteência Tech Roots
               </a>
             </div>
           </div>

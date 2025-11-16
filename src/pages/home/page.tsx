@@ -84,10 +84,10 @@ export default function Home() {
               Ras Reggae Radio
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90">
-              A melhor música reggae 24 horas por dia, 7 dias por semana
+              A melhor música reggae <b>ONLINE!</b>
             </p>
             <p className="text-lg mb-12 opacity-80 max-w-2xl mx-auto">
-              Conecte-se com a cultura reggae autêntica. Ouça os clássicos de Bob Marley, Jimmy Cliff, Burning Spear e descubra novos talentos do reggae mundial.
+              Conecte-se com a cultura <b>Reggae Autêntica</b>. Ouça os clássicos da música jamaicana e descubra sua essência Roots Reggae.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -114,8 +114,8 @@ export default function Home() {
             {/* Estatísticas em destaque */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 max-w-3xl mx-auto">
               <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
-                <div className="text-3xl font-bold text-amber-300">24/7</div>
-                <div className="text-sm opacity-90">Streaming</div>
+                <div className="text-3xl font-bold text-amber-300">24h</div>
+                <div className="text-sm opacity-90">Online</div>
               </div>
               <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-4 border border-white border-opacity-20">
                 <div className="text-3xl font-bold text-amber-300">HD</div>
@@ -158,7 +158,7 @@ export default function Home() {
                   Converse Conosco
                 </h2>
                 <p className="text-lg text-gray-600 mb-6">
-                  Participe da nossa comunidade! Converse com outros fãs de reggae, peça suas músicas favoritas e compartilhe sua paixão pela cultura rastafári.
+                  Participe da nossa comunidade! Chega junto em nosso bate papo Regueiro, peça suas músicas favoritas e compartilhe sua paixão pela música Reggae.
                 </p>
                 
                 {/* Benefícios do Chat */}

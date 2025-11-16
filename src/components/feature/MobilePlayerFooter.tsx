@@ -482,14 +482,14 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       if (navigator.share) {
         await navigator.share({
           title: 'Ras Reggae Radio - Ao Vivo',
-          text: 'Escutando a melhor rádio reggae online! 🎵',
+          text: 'Ouça a melhor rádio reggae online 24h! em https://rasreggaeradio.com 🎵',
           url: window.location.href
         });
         return;
       }
       
       // Fallback para clipboard
-      const shareText = `🎵 Ras Reggae Radio - Ao Vivo\nEscutando a melhor rádio reggae online!\n${window.location.href}`;
+      const shareText = `🎵 Estou ouvindo Ras Reggae Radio - Ao Vivo\n Ouça a melhor rádio reggae online! em https://rasreggaeradio.com\n${window.location.href}`;
       
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareText);

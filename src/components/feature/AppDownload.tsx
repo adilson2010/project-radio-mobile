@@ -3,19 +3,15 @@ export default function AppDownload() {
   const handleStoreDownload = (store: string) => {
     // Simula redirecionamento para as lojas
     if (store === 'google') {
-      window.open('https://play.google.com/store/apps', '_blank');
+      window.open('https://play.google.com/store/apps/details?id=com.zenofm.player&hl=pt_BR/', '_blank');
     } else if (store === 'apple') {
-      window.open('https://apps.apple.com/', '_blank');
+      window.open('https://apps.apple.com/br/app/zenoradio/id1207197757/', '_blank');
     }
   };
 
   return (
     <div className="bg-gradient-to-br from-green-800 to-yellow-600 rounded-2xl p-8 text-white">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-4">Baixe Nosso App</h2>
-        <p className="text-lg opacity-90">
-          Leve a melhor música reggae para onde você for no seu smartphone!
-        </p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8 items-center">
@@ -32,16 +28,16 @@ export default function AppDownload() {
               <span className="text-sm">Qualidade HD</span>
             </div>
             <div className="flex items-center space-x-3">
-              <i className="ri-download-cloud-line text-yellow-300 text-xl w-6 h-6 flex items-center justify-center"></i>
-              <span className="text-sm">Offline com favoritos</span>
+              <i className="ri-bluetooth-connect-line text-yellow-300 text-xl w-6 h-6 flex items-center justify-center"></i>
+              <span className="text-sm">Conexão Bluetooth</span>
             </div>
             <div className="flex items-center space-x-3">
               <i className="ri-notification-line text-yellow-300 text-xl w-6 h-6 flex items-center justify-center"></i>
               <span className="text-sm">Notificações</span>
             </div>
             <div className="flex items-center space-x-3">
-              <i className="ri-chat-3-line text-yellow-300 text-xl w-6 h-6 flex items-center justify-center"></i>
-              <span className="text-sm">Chat integrado</span>
+              <i className="ri-folder-shared-line text-yellow-300 text-xl w-6 h-6 flex items-center justify-center"></i>
+              <span className="text-sm">Compartilhe com amigos</span>
             </div>
             <div className="flex items-center space-x-3">
               <i className="ri-headphone-line text-yellow-300 text-xl w-6 h-6 flex items-center justify-center"></i>
@@ -105,8 +101,8 @@ export default function AppDownload() {
           <div className="text-sm opacity-90">Downloads</div>
         </div>
         <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4">
-          <div className="text-2xl font-bold text-yellow-300">24/7</div>
-          <div className="text-sm opacity-90">Streaming</div>
+          <div className="text-2xl font-bold text-yellow-300">24h</div>
+          <div className="text-sm opacity-90">Online</div>
         </div>
         <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4">
           <div className="text-2xl font-bold text-yellow-300">Grátis</div>

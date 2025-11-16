@@ -22,9 +22,9 @@ const ChatrollChat: React.FC = () => {
           height="350px" 
           frameBorder="0" 
           scrolling="no" 
-          marginHeight="0" 
-          marginWidth="0" 
-          allowTransparency="true" 
+          marginHeight={0} 
+          marginWidth={0} 
+          allowTransparency={true} 
           src="https://chatroll.com/embed/chat/chatrasreggae?id=ukTmEbbUQET&platform=html"
           className="w-full"
           title="Chat da Rádio"

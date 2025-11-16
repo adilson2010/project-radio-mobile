@@ -76,7 +76,7 @@ export default function Header() {
             </div>
             <div className="text-white">
               <h1 className="text-xl font-bold" style={{ fontFamily: 'Pacifico, serif' }}>Ras Reggae Radio</h1>
-              <p className="text-sm opacity-90 font-medium">Streaming 24h</p>
+              <p className="text-sm opacity-90 font-medium">A Sua Rádio Reggae</p>
             </div>
           </Link>
 
