@@ -72,7 +72,7 @@ export default function AdminSetupPage() {
           setMessageType('info');
           
           // Tentar fazer login com a senha fornecida
-          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+          const { data: loginData } = await supabase.auth.signInWithPassword({
             email: email,
             password: password,
           });
@@ -127,7 +127,7 @@ export default function AdminSetupPage() {
         }
 
         // Atualizar a senha do usuário se necessário
-        const { data: userData, error: userError } = await supabase.auth.update({
+        const { error: userError } = await supabase.auth.updateUser({
           password: password,
         });
 
@@ -212,7 +212,7 @@ export default function AdminSetupPage() {
     
     try {
       // Testar conexão com a tabela admin_users
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('admin_users')
         .select('count')
         .limit(1);

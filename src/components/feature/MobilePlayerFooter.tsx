@@ -489,7 +489,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       }
       
       // Fallback para clipboard
-      const shareText = `🎵 Estou ouvindo Ras Reggae Radio - Ao Vivo\n Ouça a melhor rádio reggae online! em https://rasreggaeradio.com\n${window.location.href}`;
+      const shareText = `🎵 Estou ouvindo Ras Reggae Radio - Ao Vivo\n Ouça a melhor rádio reggae online! em https://rasreggaeradio.com \n${window.location.href}`;
       
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareText);
