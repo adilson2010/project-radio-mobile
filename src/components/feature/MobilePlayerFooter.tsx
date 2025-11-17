@@ -1,11 +1,10 @@
-
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 interface MobilePlayerFooterRef {
   togglePlay: () => void;
 }
 
-const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
+const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('Clique em Play para ouvir');
@@ -14,9 +13,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
   const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   const [networkStatus, setNetworkStatus] = useState('online');
-  const [isAudioReady, setIsAudioReady] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentSong, setCurrentSong] = useState('Transmissão ao Vivo');
   const [currentArtist, setCurrentArtist] = useState('Ras Reggae Radio');
@@ -24,13 +21,17 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
   const listeningTimerRef = useRef<NodeJS.Timeout | null>(null);
   const listenersTimerRef = useRef<NodeJS.Timeout | null>(null);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const wakeLockRef = useRef<any>(null);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  const currentUrlIndexRef = useRef(0);
+  const retryCountRef = useRef(0);
+  const isInitializingRef = useRef(false);
+  const hasUserInteractedRef = useRef(false);
 
   // URLs de streaming otimizadas para mobile
   const streamUrls = [
-    'https://stream-175.zeno.fm/bbh6u7w8gwzuv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJiYmg2dTd3OGd3enV2IiwiaG9zdCI6InN0cmVhbS0xNzUuemVuby5mbSIsInRtIjpmYWxzZSwicnR0bCI6NSwianRpIjoiM3Rsa2c5eUVSRWk1eGRNUVJsYzBsdyIsImlhdCI6MTc2Mjk5OTA1NSwiZXhwIjoxNzYyOTk5MTE1fQ.dmryXud1zSk8vL1J-5oEIHuSgb9NcwX0DEMmTwn5QdE',
+    'https://stream.zeno.fm/bbh6u7w8gwzuv',
     'https://stream-175.zeno.fm/bbh6u7w8gwzuv',
-    'https://stream.zeno.fm/bbh6u7w8gwzuv'
+    'https://stream-175.zeno.fm/bbh6u7w8gwzuv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJiYmg2dTd3OGd3enV2IiwiaG9zdCI6InN0cmVhbS0xNzUuemVuby5mbSIsInRtIjpmYWxzZSwicnR0bCI6NSwianRpIjoiM3Rsa2c5eUVSRWk1eGRNUVJsYzBsdyIsImlhdCI6MTc2Mjk5OTA1NSwiZXhwIjoxNzYyOTk5MTE1fQ.dmryXud1zSk8vL1J-5oEIHuSgb9NcwX0DEMmTwn5QdE'
   ];
 
   // Detectar dispositivos móveis e sistemas
@@ -68,10 +69,8 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
   // Wake Lock para manter tela ativa durante reprodução
   const requestWakeLock = async () => {
     try {
-      if ('wakeLock' in navigator && (navigator as any).wakeLock && isPlaying) {
-        const wakeLock = await (navigator as any).wakeLock.request('screen');
-        wakeLockRef.current = wakeLock;
-        console.log('Wake Lock ativado');
+      if ('wakeLock' in navigator && isPlaying) {
+        wakeLockRef.current = await navigator.wakeLock.request('screen');
       }
     } catch (err) {
       console.log('Wake Lock não suportado:', err);
@@ -82,14 +81,12 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
     if (wakeLockRef.current) {
       wakeLockRef.current.release();
       wakeLockRef.current = null;
-      console.log('Wake Lock liberado');
     }
   };
 
   // Configurar Media Session API avançada para CarPlay/Android Auto
   const setupAdvancedMediaSession = () => {
     if ('mediaSession' in navigator) {
-      // Metadados detalhados para CarPlay/Android Auto
       navigator.mediaSession.metadata = new MediaMetadata({
         title: currentSong,
         artist: currentArtist,
@@ -128,7 +125,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
         ]
       });
 
-      // Handlers para CarPlay/Android Auto
       navigator.mediaSession.setActionHandler('play', () => {
         if (!isPlaying) togglePlay();
       });
@@ -141,31 +137,8 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
         if (isPlaying) togglePlay();
       });
 
-      // Handlers adicionais para carros
-      navigator.mediaSession.setActionHandler('seekbackward', () => {
-        // Para rádio ao vivo, reiniciar stream
-        restartStream();
-      });
-
-      navigator.mediaSession.setActionHandler('seekforward', () => {
-        // Para rádio ao vivo, reiniciar stream
-        restartStream();
-      });
-
-      navigator.mediaSession.setActionHandler('previoustrack', () => {
-        // Reiniciar stream (simula mudança de faixa)
-        restartStream();
-      });
-
-      navigator.mediaSession.setActionHandler('nexttrack', () => {
-        // Reiniciar stream (simula mudança de faixa)
-        restartStream();
-      });
-
-      // Atualizar estado de reprodução
       navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
 
-      // Posição para streams ao vivo
       if (isPlaying) {
         navigator.mediaSession.setPositionState({
           duration: Infinity,
@@ -176,7 +149,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
     }
   };
 
-  // Detectar status da rede com otimizações mobile
+  // Detectar status da rede
   const checkNetworkStatus = () => {
     const updateNetworkStatus = () => {
       const online = navigator.onLine;
@@ -190,18 +163,11 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
       }
     };
 
-    // Listeners para mudanças de rede
     window.addEventListener('online', updateNetworkStatus);
     window.addEventListener('offline', updateNetworkStatus);
     
-    // Listener para mudanças de visibilidade (importante para mobile)
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden && isPlaying) {
-        // Manter reprodução em background
-        console.log('App em background, mantendo reprodução');
-      } else if (!document.hidden && isPlaying) {
-        // App voltou ao foreground
-        console.log('App em foreground');
+      if (!document.hidden && isPlaying) {
         setupAdvancedMediaSession();
       }
     });
@@ -214,81 +180,72 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
     };
   };
 
-  // Inicializar áudio otimizado para mobile
-  const initializeAudio = async (urlIndex = 0) => {
-    if (!audioRef.current || urlIndex >= streamUrls.length) {
-      setConnectionStatus('Erro - Clique em Play para tentar novamente');
-      setIsLoading(false);
-      setIsBuffering(false);
-      releaseWakeLock();
-      return false;
-    }
-
-    const audio = audioRef.current;
-    
-    // Configurações específicas para mobile
-    audio.crossOrigin = 'anonymous';
-    audio.preload = 'none';
-    
-    // Configurações específicas para iOS
-    if (isIOS()) {
-      (audio as any).playsInline = true;
-      audio.muted = false;
-    }
-    
-    // Configurações específicas para Android
-    if (isAndroid()) {
-      (audio as any).playsInline = true;
-    }
-    
-    // Função para lidar com erros otimizada
-    const handleAudioError = async () => {
-      console.log(`Erro na URL ${urlIndex + 1}/${streamUrls.length}`);
+  // Limpar áudio completamente
+  const cleanupAudio = () => {
+    if (audioRef.current) {
+      const audio = audioRef.current;
       
-      // Tentar próxima URL
-      if (urlIndex + 1 < streamUrls.length) {
-        console.log(`Tentando URL ${urlIndex + 2}...`);
-        setTimeout(() => initializeAudio(urlIndex + 1), 1000);
-        return;
-      }
+      // Pausar e limpar
+      audio.pause();
+      audio.src = '';
+      audio.load();
       
-      // Se todas as URLs falharam, tentar retry
-      if (retryCount < 3) {
-        setRetryCount(prev => prev + 1);
-        setConnectionStatus(`Reconectando... (${retryCount + 1}/3)`);
-        setTimeout(() => initializeAudio(0), 2000);
-        return;
-      }
-      
-      // Falha total
-      setIsPlaying(false);
-      setIsLoading(false);
-      setIsBuffering(false);
-      setConnectionStatus('Erro - Clique em Play para tentar novamente');
-      setRetryCount(0);
-      releaseWakeLock();
-    };
-    
-    try {
-      // Limpar listeners anteriores
+      // Remover todos os event listeners clonando o elemento
       const newAudio = audio.cloneNode() as HTMLAudioElement;
       if (audio.parentNode) {
         audio.parentNode.replaceChild(newAudio, audio);
         audioRef.current = newAudio;
       }
+    }
+  };
+
+  // Inicializar áudio otimizado para mobile
+  const initializeAudio = async () => {
+    // Prevenir múltiplas inicializações simultâneas
+    if (isInitializingRef.current) {
+      console.log('Já está inicializando, aguarde...');
+      return false;
+    }
+
+    // Verificar se usuário já interagiu (necessário para iOS)
+    if (!hasUserInteractedRef.current) {
+      console.log('Aguardando interação do usuário...');
+      return false;
+    }
+
+    isInitializingRef.current = true;
+
+    try {
+      if (!audioRef.current) {
+        console.error('Referência de áudio não encontrada');
+        isInitializingRef.current = false;
+        return false;
+      }
+
+      // Limpar áudio anterior
+      cleanupAudio();
+
+      const audio = audioRef.current;
       
-      const currentAudio = audioRef.current;
+      // Configurações específicas para mobile
+      audio.crossOrigin = 'anonymous';
+      audio.preload = 'none';
+      audio.playsInline = true;
+      
+      // Obter URL atual
+      const currentUrl = streamUrls[currentUrlIndexRef.current];
+      console.log(`Tentando URL ${currentUrlIndexRef.current + 1}/${streamUrls.length}: ${currentUrl}`);
       
       // Configurar novo stream
-      currentAudio.src = streamUrls[urlIndex];
-      currentAudio.volume = (isMuted ? 0 : volume) / 100;
+      audio.src = currentUrl;
+      audio.volume = (isMuted ? 0 : volume) / 100;
       
-      // Event listeners otimizados para mobile
+      // Event listeners otimizados
       const handleCanPlay = () => {
-        setIsAudioReady(true);
         setIsBuffering(false);
         setConnectionStatus('Transmissão AAC • Ao Vivo');
         setupAdvancedMediaSession();
+        retryCountRef.current = 0;
       };
 
       const handlePlaying = () => {
@@ -296,22 +253,18 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
         setIsLoading(false);
         setIsBuffering(false);
         setConnectionStatus('Transmissão AAC • Ao Vivo');
-        setRetryCount(0);
+        retryCountRef.current = 0;
+        currentUrlIndexRef.current = 0; // Reset para primeira URL em caso de sucesso
         
-        // Ativar Wake Lock
         requestWakeLock();
-        
-        // Configurar Media Session
         setupAdvancedMediaSession();
         
-        // Iniciar timer de escuta
         if (listeningTimerRef.current) {
           clearInterval(listeningTimerRef.current);
         }
         listeningTimerRef.current = setInterval(() => {
           setListeningTime(prev => {
             const newTime = prev + 1;
-            // Atualizar posição no Media Session
             if ('mediaSession' in navigator) {
               navigator.mediaSession.setPositionState({
                 duration: Infinity,
@@ -322,6 +275,8 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
             return newTime;
           });
         }, 1000);
+
+        isInitializingRef.current = false;
       };
 
       const handlePause = () => {
@@ -333,10 +288,11 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
           clearInterval(listeningTimerRef.current);
         }
         
-        // Atualizar Media Session
         if ('mediaSession' in navigator) {
           navigator.mediaSession.playbackState = 'paused';
         }
+
+        isInitializingRef.current = false;
       };
 
       const handleWaiting = () => {
@@ -344,52 +300,82 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
         setConnectionStatus('Carregando...');
       };
 
-      const handleLoadStart = () => {
-        setIsBuffering(true);
-        setConnectionStatus('Conectando...');
-      };
-
-      const handleProgress = () => {
-        // Stream está carregando
-        if (currentAudio.buffered.length > 0) {
-          setIsBuffering(false);
+      const handleError = async () => {
+        console.error(`Erro na URL ${currentUrlIndexRef.current + 1}`);
+        
+        // Tentar próxima URL
+        if (currentUrlIndexRef.current + 1 < streamUrls.length) {
+          currentUrlIndexRef.current++;
+          console.log(`Tentando próxima URL...`);
+          isInitializingRef.current = false;
+          
+          // Aguardar 1 segundo antes de tentar próxima URL
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return initializeAudio();
         }
+        
+        // Se todas as URLs falharam, tentar retry
+        if (retryCountRef.current < 3) {
+          retryCountRef.current++;
+          currentUrlIndexRef.current = 0; // Reset para primeira URL
+          setConnectionStatus(`Reconectando... (${retryCountRef.current}/3)`);
+          console.log(`Retry ${retryCountRef.current}/3`);
+          isInitializingRef.current = false;
+          
+          // Aguardar 2 segundos antes de retry
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          return initializeAudio();
+        }
+        
+        // Falha total
+        console.error('Todas as tentativas falharam');
+        setIsPlaying(false);
+        setIsLoading(false);
+        setIsBuffering(false);
+        setConnectionStatus('Erro - Clique em Play para tentar novamente');
+        retryCountRef.current = 0;
+        currentUrlIndexRef.current = 0;
+        releaseWakeLock();
+        isInitializingRef.current = false;
       };
 
       // Adicionar listeners
-      currentAudio.addEventListener('canplay', handleCanPlay);
-      currentAudio.addEventListener('playing', handlePlaying);
-      currentAudio.addEventListener('pause', handlePause);
-      currentAudio.addEventListener('waiting', handleWaiting);
-      currentAudio.addEventListener('loadstart', handleLoadStart);
-      currentAudio.addEventListener('progress', handleProgress);
-      currentAudio.addEventListener('error', handleAudioError);
-      currentAudio.addEventListener('stalled', handleAudioError);
+      audio.addEventListener('canplay', handleCanPlay, { once: true });
+      audio.addEventListener('playing', handlePlaying, { once: true });
+      audio.addEventListener('pause', handlePause);
+      audio.addEventListener('waiting', handleWaiting);
+      audio.addEventListener('error', handleError, { once: true });
+      audio.addEventListener('stalled', handleError, { once: true });
 
       // Tentar carregar e reproduzir
-      await currentAudio.load();
+      await audio.load();
+      const playPromise = audio.play();
       
-      // Para iOS, aguardar interação do usuário
-      if (isIOS()) {
-        // iOS requer interação do usuário para reproduzir
-        const playPromise = currentAudio.play();
-        if (playPromise !== undefined) {
-          await playPromise;
-        }
-      } else {
-        await currentAudio.play();
+      if (playPromise !== undefined) {
+        await playPromise;
       }
       
       return true;
     } catch (error) {
       console.error('Erro ao inicializar áudio:', error);
-      await handleAudioError();
+      isInitializingRef.current = false;
+      
+      // Tentar próxima URL em caso de erro
+      if (currentUrlIndexRef.current + 1 < streamUrls.length) {
+        currentUrlIndexRef.current++;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return initializeAudio();
+      }
+      
       return false;
     }
   };
 
   // Toggle play/pause otimizado
   const togglePlay = async () => {
+    // Marcar que usuário interagiu
+    hasUserInteractedRef.current = true;
+
     if (networkStatus === 'offline') {
       setConnectionStatus('Sem conexão com a internet');
       return;
@@ -408,7 +394,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
         clearInterval(listeningTimerRef.current);
       }
       
-      // Atualizar Media Session
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'paused';
       }
@@ -418,19 +403,11 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
       setIsBuffering(true);
       setConnectionStatus('Conectando ao stream...');
       
-      if (isAudioReady && audioRef.current.src) {
-        try {
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            await playPromise;
-          }
-        } catch (error) {
-          console.error('Erro ao reproduzir:', error);
-          await initializeAudio(0);
-        }
-      } else {
-        await initializeAudio(0);
-      }
+      // Reset dos contadores
+      currentUrlIndexRef.current = 0;
+      retryCountRef.current = 0;
+      
+      await initializeAudio();
     }
   };
 
@@ -457,39 +434,36 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
 
   // Reiniciar stream otimizado
   const restartStream = async () => {
-    if (audioRef.current) {
+    if (audioRef.current && !isInitializingRef.current) {
       setIsLoading(true);
       setIsBuffering(true);
       setConnectionStatus('Reiniciando stream...');
-      setRetryCount(0);
       
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.src = '';
-      setIsAudioReady(false);
+      // Reset dos contadores
+      currentUrlIndexRef.current = 0;
+      retryCountRef.current = 0;
+      
+      cleanupAudio();
       releaseWakeLock();
       
-      setTimeout(async () => {
-        await initializeAudio(0);
-      }, 1000);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await initializeAudio();
     }
   };
 
   // Compartilhar via Bluetooth/CarPlay/Android Auto
   const shareToCarSystem = async () => {
     try {
-      // Tentar Web Share API primeiro
       if (navigator.share) {
         await navigator.share({
           title: 'Ras Reggae Radio - Ao Vivo',
-          text: 'Ouça a melhor rádio reggae online 24h! em https://rasreggaeradio.com 🎵',
+          text: 'Escutando a melhor rádio reggae online! 🎵',
           url: window.location.href
         });
         return;
       }
       
-      // Fallback para clipboard
-      const shareText = `🎵 Estou ouvindo Ras Reggae Radio - Ao Vivo\n Ouça a melhor rádio reggae online! em https://rasreggaeradio.com \n${window.location.href}`;
+      const shareText = `🎵 Ras Reggae Radio - Ao Vivo\nEscutando a melhor rádio reggae online!\n${window.location.href}`;
       
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareText);
@@ -507,6 +481,26 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
   useImperativeHandle(ref, () => ({
     togglePlay
   }));
+
+  // Cleanup e network status
+  useEffect(() => {
+    const cleanupNetwork = checkNetworkStatus();
+    
+    return () => {
+      cleanupNetwork();
+      releaseWakeLock();
+      if (listeningTimerRef.current) {
+        clearInterval(listeningTimerRef.current);
+      }
+      if (listenersTimerRef.current) {
+        clearInterval(listenersTimerRef.current);
+      }
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
+      cleanupAudio();
+    };
+  }, []);
 
   // Atualizar contadores de ouvintes
   useEffect(() => {
@@ -527,16 +521,13 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
     };
   }, [isPlaying]);
 
-  // Atualizar informações da música (simulado para rádio ao vivo)
+  // Atualizar informações da música
   useEffect(() => {
     const songs = [
       { title: 'Transmissão ao Vivo', artist: 'Ras Reggae Radio' },
       { title: 'Roots Rock Reggae', artist: 'Bob Marley' },
       { title: 'One Love', artist: 'Bob Marley' },
-      { title: 'No Woman No Cry', artist: 'Bob Marley' },
-      { title: 'Three Little Birds', artist: 'Bob Marley' },
-      { title: 'Buffalo Soldier', artist: 'Bob Marley' },
-      { title: 'Redemption Song', artist: 'Bob Marley' }
+      { title: 'No Woman No Cry', artist: 'Bob Marley' }
     ];
 
     if (isPlaying) {
@@ -547,34 +538,10 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
         setupAdvancedMediaSession();
       };
 
-      // Atualizar música a cada 3-5 minutos
       const interval = setInterval(updateSong, Math.random() * 120000 + 180000);
       return () => clearInterval(interval);
     }
   }, [isPlaying]);
-
-  // Cleanup e network status
-  useEffect(() => {
-    const cleanupNetwork = checkNetworkStatus();
-    
-    return () => {
-      cleanupNetwork();
-      releaseWakeLock();
-      if (listeningTimerRef.current) {
-        clearInterval(listeningTimerRef.current);
-      }
-      if (listenersTimerRef.current) {
-        clearInterval(listenersTimerRef.current);
-      }
-      if (retryTimeoutRef.current) {
-        clearTimeout(retryTimeoutRef.current);
-      }
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-      }
-    };
-  }, []);
 
   // Não mostrar em desktop
   if (!isMobile()) {
@@ -623,9 +590,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
             </button>
           </div>
 
-          {/* Conteúdo Principal */}
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
-            {/* Logo Principal */}
             <div className="mb-6">
               <div className="w-40 h-40 mx-auto rounded-full bg-gradient-to-br from-green-500 via-yellow-400 to-green-500 p-2 shadow-2xl">
                 <img
@@ -637,14 +602,12 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
               </div>
             </div>
 
-            {/* Informações da Música */}
             <div className="mb-6 text-center">
               <h3 className="text-2xl font-bold text-white mb-2">{currentSong}</h3>
               <p className="text-lg text-yellow-200 mb-1">{currentArtist}</p>
               <p className="text-sm text-green-200">A Voz Autêntica do Reggae</p>
             </div>
 
-            {/* Status */}
             <div className="mb-8 w-full max-w-md">
               <div className="bg-green-800/50 rounded-2xl px-6 py-4 mb-4 border border-green-600">
                 <p className="text-white text-base font-semibold flex items-center justify-center space-x-2">
@@ -655,7 +618,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
                 </p>
               </div>
 
-              {/* Estatísticas */}
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-black/30 rounded-xl p-3 text-center border border-green-700">
                   <p className="text-yellow-300 text-sm font-semibold">{listeners.toLocaleString()}</p>
@@ -668,12 +630,12 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
               </div>
             </div>
 
-            {/* Controles Principais */}
             <div className="mb-8">
               <div className="flex items-center justify-center space-x-6">
                 <button
                   onClick={restartStream}
-                  className="bg-black/30 hover:bg-black/50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 border border-green-600"
+                  disabled={isInitializingRef.current}
+                  className="bg-black/30 hover:bg-black/50 disabled:opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 border border-green-600"
                   aria-label="Reiniciar stream"
                 >
                   <i className="ri-refresh-line text-xl"></i>
@@ -681,7 +643,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
 
                 <button
                   onClick={togglePlay}
-                  disabled={isLoading || networkStatus === 'offline'}
+                  disabled={isLoading || networkStatus === 'offline' || isInitializingRef.current}
                   className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-full w-20 h-20 flex items-center justify-center transition-all duration-200 shadow-2xl transform hover:scale-105 disabled:scale-100"
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
                 >
@@ -704,7 +666,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
               </div>
             </div>
 
-            {/* Controle de Volume */}
             <div className="w-full max-w-md mb-6">
               <div className="bg-black/30 rounded-2xl p-4 border border-green-700">
                 <div className="flex items-center space-x-4">
@@ -737,7 +698,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
               </div>
             </div>
 
-            {/* Badges de Compatibilidade */}
             <div className="flex flex-wrap justify-center gap-2 mb-4">
               <div className="bg-black/40 px-3 py-1 rounded-full border border-green-600">
                 <span className="text-green-300 text-xs font-semibold flex items-center space-x-1">
@@ -767,7 +727,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
         <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-green-800 via-yellow-700 to-green-800 border-t-2 border-green-600 z-40 shadow-2xl">
           <div className="px-4 py-3">
             <div className="flex items-center justify-between">
-              {/* Info da Música */}
               <div 
                 className="flex items-center space-x-3 flex-1 cursor-pointer"
                 onClick={() => setIsExpanded(true)}
@@ -792,11 +751,10 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
                 </div>
               </div>
 
-              {/* Controles */}
               <div className="flex items-center space-x-3">
                 <button
                   onClick={togglePlay}
-                  disabled={isLoading || networkStatus === 'offline'}
+                  disabled={isLoading || networkStatus === 'offline' || isInitializingRef.current}
                   className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 shadow-lg transform hover:scale-105 disabled:scale-100"
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
                 >
@@ -819,7 +777,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
               </div>
             </div>
 
-            {/* Barra de Progresso Visual */}
             {isPlaying && (
               <div className="mt-2">
                 <div className="w-full bg-green-900/50 rounded-full h-1">
@@ -831,31 +788,28 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
         </div>
       )}
 
-      {/* Estilos CSS para slider */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          .slider::-webkit-slider-thumb {
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #10b981, #eab308);
-            cursor: pointer;
-            border: 2px solid #ffffff;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-          }
+      <style jsx>{`
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: linear-gradient(45deg, #10b981, #eab308);
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
 
-          .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #10b981, #eab308);
-            cursor: pointer;
-            border: 2px solid #ffffff;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-          }
-        `
-      }} />
+        .slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: linear-gradient(45deg, #10b981, #eab308);
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+      `}</style>
     </>
   );
 });

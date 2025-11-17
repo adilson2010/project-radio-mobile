@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface Product {
   id: string;
@@ -152,7 +152,7 @@ export default function Loja() {
     try {
       setCheckoutLoading(true);
       
-      const items = Object.entries(cart).map(([_, item]) => ({
+      const items = Object.entries(cart).map(([cartKey, item]) => ({
         id: item.product.id,
         quantity: item.quantity,
         size: item.selectedSize
