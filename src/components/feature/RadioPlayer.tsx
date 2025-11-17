@@ -522,7 +522,7 @@ export default function RadioPlayer() {
         playsInline
         crossOrigin="anonymous"
         controls={false}
-        title="Ras Reggae Radio - Live Stream"
+        title="Ras Reggae Radio - Ao Vivo"
         aria-label="Player de áudio da Ras Reggae Radio"
       />
 
@@ -603,7 +603,7 @@ export default function RadioPlayer() {
               onClick={() => {
                 const shareData = {
                   title: 'Estou ouvindo Ras Reggae Radio - Ao Vivo',
-                  text: 'Escutando a melhor rádio reggae online!',
+                  text: 'Escutando a melhor rádio reggae online! encontre em https://rasreggaeradio.com.br',
                   url: window.location.href
                 };
                 
