@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 
@@ -99,22 +98,44 @@ export default function AdminSetupPage() {
         setMessageType('success');
       }
 
-      if (userId) {
-        // Garantir que o registro admin existe
-        await ensureAdminRecord(userId);
-        
-        // Enviar email de alteração de senha
-        await sendEmailNotification('password_changed', email, {
-          loginUrl: window.location.origin + '/admin/login'
-        });
-        
-        setMessage('✅ Administrador configurado com sucesso! Email de confirmação enviado.');
-        setMessageType('success');
-        setStep(3);
-        
-        // Fazer logout para permitir novo login
-        await supabase.auth.signOut();
+      if (!userId) {
+        throw new Error('Não foi possível obter o ID do usuário.');
       }
+
+      // Garantir que o usuário admin exista na tabela 'admin_users' (Upsert)
+      const { error: adminError } = await supabase
+        .from('admin_users')
+        .upsert({
+          id: userId,
+          email: email,
+          role: 'admin',
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'email' });
+
+      if (adminError) {
+        throw adminError;
+      }
+
+      // Atualizar a senha do usuário se necessário
+      const { data: userData, error: userError } = await supabase.auth.update({
+        password: password,
+      });
+
+      if (userError) {
+        throw userError;
+      }
+
+      // Enviar email de alteração de senha
+      await sendEmailNotification('password_changed', email, {
+        loginUrl: window.location.origin + '/admin/login'
+      });
+      
+      setMessage('✅ Administrador configurado com sucesso! Email de confirmação enviado.');
+      setMessageType('success');
+      setStep(3);
+      
+      // Fazer logout para permitir novo login
+      await supabase.auth.signOut();
 
     } catch (error: any) {
       console.error('Erro ao criar administrador:', error);
