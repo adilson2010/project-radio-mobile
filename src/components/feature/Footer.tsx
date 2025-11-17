@@ -47,7 +47,7 @@ export default function Footer() {
                 <h3 className="text-2xl font-bold mb-1" style={{ fontFamily: 'Pacifico, serif' }}>
                   Ras Reggae Radio
                 </h3>
-                <p className="text-yellow-200 text-sm opacity-90">A Voz Autêntica do Reggae</p>
+                <p className="text-yellow-200 text-sm opacity-90">A Voz Autêntica do Reggae na Web</p>
               </div>
             </div>
             <p className="text-yellow-100 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
