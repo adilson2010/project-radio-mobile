@@ -1,4 +1,6 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
+
+import { serve } from 'https://deno.land/std@0.168.0/http/mod.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 serve(async (req) => {
@@ -35,7 +37,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       status: 400,
     });

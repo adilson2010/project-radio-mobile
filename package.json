@@ -43,5 +43,8 @@
     "preview": "vite preview"
   },
   "type": "module",
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "pacth": "npm version patch",
+  "minor": "npm version minor",
+  "major": "npm version major"
 }
