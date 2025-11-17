@@ -51,7 +51,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-yellow-100 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
-              Desde 2010 espalhando amor, paz e unidade através da música reggae. 
+              Desde 2010 espalhando amor, paz e humildade através da música reggae. 
               Transmissão 24 horas com a melhor seleção musical.
             </p>
           </div>
