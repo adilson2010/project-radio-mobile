@@ -372,7 +372,13 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   };
 
   // Toggle play/pause otimizado
-  const togglePlay = async () => {
+  const togglePlay = async (e?: React.MouseEvent) => {
+    // Prevenir comportamento padrão e propagação
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     // Marcar que usuário interagiu
     hasUserInteractedRef.current = true;
 
@@ -423,7 +429,12 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   };
 
   // Toggle mudo
-  const toggleMute = () => {
+  const toggleMute = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     const newMuted = !isMuted;
     setIsMuted(newMuted);
     
@@ -433,7 +444,12 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   };
 
   // Reiniciar stream otimizado
-  const restartStream = async () => {
+  const restartStream = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     if (audioRef.current && !isInitializingRef.current) {
       setIsLoading(true);
       setIsBuffering(true);
@@ -452,7 +468,12 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   };
 
   // Compartilhar via Bluetooth/CarPlay/Android Auto
-  const shareToCarSystem = async () => {
+  const shareToCarSystem = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     try {
       if (navigator.share) {
         await navigator.share({
@@ -477,9 +498,18 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     }
   };
 
+  // Expandir/Recolher player
+  const handleExpandToggle = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setIsExpanded(!isExpanded);
+  };
+
   // Expor função para componente pai
   useImperativeHandle(ref, () => ({
-    togglePlay
+    togglePlay: () => togglePlay()
   }));
 
   // Cleanup e network status
@@ -582,9 +612,10 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
               </div>
             </div>
             <button 
-              onClick={() => setIsExpanded(false)}
+              onClick={handleExpandToggle}
               className="text-white hover:text-yellow-300 transition-colors bg-black/20 rounded-full w-10 h-10 flex items-center justify-center"
               aria-label="Fechar player expandido"
+              type="button"
             >
               <i className="ri-close-line text-xl"></i>
             </button>
@@ -637,6 +668,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                   disabled={isInitializingRef.current}
                   className="bg-black/30 hover:bg-black/50 disabled:opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 border border-green-600"
                   aria-label="Reiniciar stream"
+                  type="button"
                 >
                   <i className="ri-refresh-line text-xl"></i>
                 </button>
@@ -646,6 +678,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                   disabled={isLoading || networkStatus === 'offline' || isInitializingRef.current}
                   className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-full w-20 h-20 flex items-center justify-center transition-all duration-200 shadow-2xl transform hover:scale-105 disabled:scale-100"
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
+                  type="button"
                 >
                   {isLoading || isBuffering ? (
                     <i className="ri-loader-4-line animate-spin text-3xl"></i>
@@ -660,6 +693,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                   onClick={shareToCarSystem}
                   className="bg-black/30 hover:bg-black/50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 border border-green-600"
                   aria-label="Compartilhar"
+                  type="button"
                 >
                   <i className="ri-share-line text-xl"></i>
                 </button>
@@ -673,6 +707,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                     onClick={toggleMute}
                     className="text-white hover:text-yellow-300 transition-colors"
                     aria-label={isMuted ? 'Ativar som' : 'Silenciar'}
+                    type="button"
                   >
                     <i className={`text-xl ${isMuted ? 'ri-volume-mute-line' : volume > 50 ? 'ri-volume-up-line' : 'ri-volume-down-line'}`}></i>
                   </button>
@@ -729,7 +764,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
             <div className="flex items-center justify-between">
               <div 
                 className="flex items-center space-x-3 flex-1 cursor-pointer"
-                onClick={() => setIsExpanded(true)}
+                onClick={handleExpandToggle}
               >
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 via-yellow-400 to-green-500 p-0.5 shadow-lg">
                   <img
@@ -757,6 +792,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                   disabled={isLoading || networkStatus === 'offline' || isInitializingRef.current}
                   className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 shadow-lg transform hover:scale-105 disabled:scale-100"
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
+                  type="button"
                 >
                   {isLoading || isBuffering ? (
                     <i className="ri-loader-4-line animate-spin text-lg"></i>
@@ -768,9 +804,10 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                 </button>
 
                 <button
-                  onClick={() => setIsExpanded(true)}
+                  onClick={handleExpandToggle}
                   className="text-white hover:text-yellow-300 transition-colors bg-black/20 rounded-full w-10 h-10 flex items-center justify-center"
                   aria-label="Expandir player"
+                  type="button"
                 >
                   <i className="ri-fullscreen-line text-lg"></i>
                 </button>
@@ -788,7 +825,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .slider::-webkit-slider-thumb {
           appearance: none;
           width: 20px;
