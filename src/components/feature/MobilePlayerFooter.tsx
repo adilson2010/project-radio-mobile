@@ -5,7 +5,7 @@ interface MobilePlayerFooterRef {
   togglePlay: () => void;
 }
 
-const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
+const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_props, ref) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('Clique em Play para ouvir');
