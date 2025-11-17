@@ -116,26 +116,40 @@ export default function AdminSetupPage() {
         throw adminError;
       }
 
-      // Atualizar a senha do usuário se necessário
-      const { data: userData, error: userError } = await supabase.auth.update({
-        password: password,
-      });
+      try {
+        const { error: rpcError } = await supabase.rpc('upsert_admin_user', {
+          user_id: userId,
+          user_email: email,
+        });
 
-      if (userError) {
-        throw userError;
+        if (rpcError) {
+          throw rpcError;
+        }
+
+        // Atualizar a senha do usuário se necessário
+        const { data: userData, error: userError } = await supabase.auth.update({
+          password: password,
+        });
+
+        if (userError) {
+          throw userError;
+        }
+
+        // Enviar email de alteração de senha
+        await sendEmailNotification('password_changed', email, {
+          loginUrl: window.location.origin + '/admin/login'
+        });
+        
+        setMessage('✅ Administrador configurado com sucesso! Email de confirmação enviado.');
+        setMessageType('success');
+        setStep(3);
+        
+        // Fazer logout para permitir novo login
+        await supabase.auth.signOut();
+
+      } catch (error) {
+        // Tratar o erro
       }
-
-      // Enviar email de alteração de senha
-      await sendEmailNotification('password_changed', email, {
-        loginUrl: window.location.origin + '/admin/login'
-      });
-      
-      setMessage('✅ Administrador configurado com sucesso! Email de confirmação enviado.');
-      setMessageType('success');
-      setStep(3);
-      
-      // Fazer logout para permitir novo login
-      await supabase.auth.signOut();
 
     } catch (error: any) {
       console.error('Erro ao criar administrador:', error);
