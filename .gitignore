@@ -4,4 +4,4 @@ node_modules/
 public/
 *.log
 *.deploy-hosgator.md
-vercel.json
+.vercel
