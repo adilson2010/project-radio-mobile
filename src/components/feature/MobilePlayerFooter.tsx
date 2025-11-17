@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 interface MobilePlayerFooterRef {
@@ -26,6 +27,10 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   const retryCountRef = useRef(0);
   const isInitializingRef = useRef(false);
   const hasUserInteractedRef = useRef(false);
+  const isConnectedRef = useRef(false);
+  const lastSuccessfulUrlRef = useRef(0);
+  const connectionAttemptsRef = useRef(0);
+  const maxConnectionAttemptsRef = useRef(5);
 
   // URLs de streaming otimizadas para mobile
   const streamUrls = [
@@ -69,8 +74,9 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   // Wake Lock para manter tela ativa durante reprodução
   const requestWakeLock = async () => {
     try {
-      if ('wakeLock' in navigator && isPlaying) {
+      if ('wakeLock' in navigator && isPlaying && !wakeLockRef.current) {
         wakeLockRef.current = await navigator.wakeLock.request('screen');
+        console.log('Wake Lock ativado');
       }
     } catch (err) {
       console.log('Wake Lock não suportado:', err);
@@ -81,6 +87,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     if (wakeLockRef.current) {
       wakeLockRef.current.release();
       wakeLockRef.current = null;
+      console.log('Wake Lock liberado');
     }
   };
 
@@ -157,9 +164,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       
       if (!online && isPlaying) {
         setConnectionStatus('Sem conexão com a internet');
-        setIsPlaying(false);
-        setIsBuffering(false);
-        releaseWakeLock();
+        stopPlayback();
       }
     };
 
@@ -178,6 +183,24 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       window.removeEventListener('online', updateNetworkStatus);
       window.removeEventListener('offline', updateNetworkStatus);
     };
+  };
+
+  // Parar reprodução completamente
+  const stopPlayback = () => {
+    setIsPlaying(false);
+    setIsLoading(false);
+    setIsBuffering(false);
+    isConnectedRef.current = false;
+    releaseWakeLock();
+    
+    if (listeningTimerRef.current) {
+      clearInterval(listeningTimerRef.current);
+      listeningTimerRef.current = null;
+    }
+    
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'paused';
+    }
   };
 
   // Limpar áudio completamente
@@ -213,7 +236,18 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       return false;
     }
 
+    // Verificar limite de tentativas de conexão
+    if (connectionAttemptsRef.current >= maxConnectionAttemptsRef.current) {
+      console.log('Limite de tentativas de conexão atingido');
+      setConnectionStatus('Muitas tentativas - Clique em Play para tentar novamente');
+      setIsLoading(false);
+      setIsBuffering(false);
+      connectionAttemptsRef.current = 0;
+      return false;
+    }
+
     isInitializingRef.current = true;
+    connectionAttemptsRef.current++;
 
     try {
       if (!audioRef.current) {
@@ -232,120 +266,105 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       audio.preload = 'none';
       audio.playsInline = true;
       
-      // Obter URL atual
-      const currentUrl = streamUrls[currentUrlIndexRef.current];
-      console.log(`Tentando URL ${currentUrlIndexRef.current + 1}/${streamUrls.length}: ${currentUrl}`);
+      // Começar com a última URL que funcionou
+      let urlToTry = lastSuccessfulUrlRef.current;
+      if (currentUrlIndexRef.current < streamUrls.length) {
+        urlToTry = currentUrlIndexRef.current;
+      }
+      
+      const currentUrl = streamUrls[urlToTry];
+      console.log(`Tentando URL ${urlToTry + 1}/${streamUrls.length}: ${currentUrl}`);
       
       // Configurar novo stream
       audio.src = currentUrl;
       audio.volume = (isMuted ? 0 : volume) / 100;
       
-      // Event listeners otimizados
-      const handleCanPlay = () => {
-        setIsBuffering(false);
-        setConnectionStatus('Transmissão AAC • Ao Vivo');
-        setupAdvancedMediaSession();
-        retryCountRef.current = 0;
-      };
+      // Promise para controlar timeout
+      const audioPromise = new Promise<boolean>((resolve, reject) => {
+        let resolved = false;
+        
+        // Timeout de 15 segundos para conexão
+        const timeout = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            reject(new Error('Timeout na conexão'));
+          }
+        }, 15000);
 
-      const handlePlaying = () => {
-        setIsPlaying(true);
-        setIsLoading(false);
-        setIsBuffering(false);
-        setConnectionStatus('Transmissão AAC • Ao Vivo');
-        retryCountRef.current = 0;
-        currentUrlIndexRef.current = 0; // Reset para primeira URL em caso de sucesso
-        
-        requestWakeLock();
-        setupAdvancedMediaSession();
-        
-        if (listeningTimerRef.current) {
-          clearInterval(listeningTimerRef.current);
-        }
-        listeningTimerRef.current = setInterval(() => {
-          setListeningTime(prev => {
-            const newTime = prev + 1;
-            if ('mediaSession' in navigator) {
-              navigator.mediaSession.setPositionState({
-                duration: Infinity,
-                playbackRate: 1,
-                position: newTime
-              });
+        const handleCanPlay = () => {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            setIsBuffering(false);
+            setConnectionStatus('Transmissão AAC • Ao Vivo');
+            setupAdvancedMediaSession();
+            retryCountRef.current = 0;
+            isConnectedRef.current = true;
+            lastSuccessfulUrlRef.current = urlToTry;
+            connectionAttemptsRef.current = 0; // Reset contador de tentativas
+            resolve(true);
+          }
+        };
+
+        const handlePlaying = () => {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            setIsPlaying(true);
+            setIsLoading(false);
+            setIsBuffering(false);
+            setConnectionStatus('Transmissão AAC • Ao Vivo');
+            retryCountRef.current = 0;
+            isConnectedRef.current = true;
+            lastSuccessfulUrlRef.current = urlToTry;
+            connectionAttemptsRef.current = 0; // Reset contador de tentativas
+            
+            requestWakeLock();
+            setupAdvancedMediaSession();
+            
+            if (listeningTimerRef.current) {
+              clearInterval(listeningTimerRef.current);
             }
-            return newTime;
-          });
-        }, 1000);
+            listeningTimerRef.current = setInterval(() => {
+              setListeningTime(prev => {
+                const newTime = prev + 1;
+                if ('mediaSession' in navigator) {
+                  navigator.mediaSession.setPositionState({
+                    duration: Infinity,
+                    playbackRate: 1,
+                    position: newTime
+                  });
+                }
+                return newTime;
+              });
+            }, 1000);
 
-        isInitializingRef.current = false;
-      };
+            resolve(true);
+          }
+        };
 
-      const handlePause = () => {
-        setIsPlaying(false);
-        setConnectionStatus('Pausado - Clique em Play para continuar');
-        releaseWakeLock();
-        
-        if (listeningTimerRef.current) {
-          clearInterval(listeningTimerRef.current);
-        }
-        
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'paused';
-        }
+        const handleError = () => {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            reject(new Error('Erro no áudio'));
+          }
+        };
 
-        isInitializingRef.current = false;
-      };
+        const handleWaiting = () => {
+          if (!isConnectedRef.current) {
+            setIsBuffering(true);
+            setConnectionStatus('Carregando...');
+          }
+        };
 
-      const handleWaiting = () => {
-        setIsBuffering(true);
-        setConnectionStatus('Carregando...');
-      };
-
-      const handleError = async () => {
-        console.error(`Erro na URL ${currentUrlIndexRef.current + 1}`);
-        
-        // Tentar próxima URL
-        if (currentUrlIndexRef.current + 1 < streamUrls.length) {
-          currentUrlIndexRef.current++;
-          console.log(`Tentando próxima URL...`);
-          isInitializingRef.current = false;
-          
-          // Aguardar 1 segundo antes de tentar próxima URL
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          return initializeAudio();
-        }
-        
-        // Se todas as URLs falharam, tentar retry
-        if (retryCountRef.current < 3) {
-          retryCountRef.current++;
-          currentUrlIndexRef.current = 0; // Reset para primeira URL
-          setConnectionStatus(`Reconectando... (${retryCountRef.current}/3)`);
-          console.log(`Retry ${retryCountRef.current}/3`);
-          isInitializingRef.current = false;
-          
-          // Aguardar 2 segundos antes de retry
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          return initializeAudio();
-        }
-        
-        // Falha total
-        console.error('Todas as tentativas falharam');
-        setIsPlaying(false);
-        setIsLoading(false);
-        setIsBuffering(false);
-        setConnectionStatus('Erro - Clique em Play para tentar novamente');
-        retryCountRef.current = 0;
-        currentUrlIndexRef.current = 0;
-        releaseWakeLock();
-        isInitializingRef.current = false;
-      };
-
-      // Adicionar listeners
-      audio.addEventListener('canplay', handleCanPlay, { once: true });
-      audio.addEventListener('playing', handlePlaying, { once: true });
-      audio.addEventListener('pause', handlePause);
-      audio.addEventListener('waiting', handleWaiting);
-      audio.addEventListener('error', handleError, { once: true });
-      audio.addEventListener('stalled', handleError, { once: true });
+        // Adicionar listeners
+        audio.addEventListener('canplay', handleCanPlay, { once: true });
+        audio.addEventListener('playing', handlePlaying, { once: true });
+        audio.addEventListener('error', handleError, { once: true });
+        audio.addEventListener('stalled', handleError, { once: true });
+        audio.addEventListener('waiting', handleWaiting);
+      });
 
       // Tentar carregar e reproduzir
       await audio.load();
@@ -355,18 +374,44 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
         await playPromise;
       }
       
+      // Aguardar conexão ou erro
+      await audioPromise;
+      
+      isInitializingRef.current = false;
       return true;
     } catch (error) {
       console.error('Erro ao inicializar áudio:', error);
       isInitializingRef.current = false;
       
-      // Tentar próxima URL em caso de erro
+      // Tentar próxima URL se disponível
       if (currentUrlIndexRef.current + 1 < streamUrls.length) {
         currentUrlIndexRef.current++;
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log(`Tentando próxima URL...`);
+        
+        // Aguardar 2 segundos antes de tentar próxima URL
+        await new Promise(resolve => setTimeout(resolve, 2000));
         return initializeAudio();
       }
       
+      // Se todas as URLs falharam, tentar retry limitado
+      if (retryCountRef.current < 2) {
+        retryCountRef.current++;
+        currentUrlIndexRef.current = 0; // Reset para primeira URL
+        setConnectionStatus(`Reconectando... (${retryCountRef.current}/2)`);
+        console.log(`Retry ${retryCountRef.current}/2`);
+        
+        // Aguardar 3 segundos antes de retry
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        return initializeAudio();
+      }
+      
+      // Falha total
+      console.error('Todas as tentativas falharam');
+      stopPlayback();
+      setConnectionStatus('Erro - Clique em Play para tentar novamente');
+      retryCountRef.current = 0;
+      currentUrlIndexRef.current = 0;
+      connectionAttemptsRef.current = 0;
       return false;
     }
   };
@@ -392,26 +437,19 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     if (isPlaying) {
       // Pausar
       audioRef.current.pause();
-      setIsPlaying(false);
+      stopPlayback();
       setConnectionStatus('Pausado - Clique em Play para continuar');
-      releaseWakeLock();
-      
-      if (listeningTimerRef.current) {
-        clearInterval(listeningTimerRef.current);
-      }
-      
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'paused';
-      }
     } else {
       // Reproduzir
       setIsLoading(true);
       setIsBuffering(true);
       setConnectionStatus('Conectando ao stream...');
       
-      // Reset dos contadores
-      currentUrlIndexRef.current = 0;
-      retryCountRef.current = 0;
+      // Reset dos contadores apenas se não estiver conectado
+      if (!isConnectedRef.current) {
+        currentUrlIndexRef.current = lastSuccessfulUrlRef.current;
+        retryCountRef.current = 0;
+      }
       
       await initializeAudio();
     }
@@ -455,9 +493,11 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       setIsBuffering(true);
       setConnectionStatus('Reiniciando stream...');
       
-      // Reset dos contadores
+      // Reset completo
       currentUrlIndexRef.current = 0;
       retryCountRef.current = 0;
+      connectionAttemptsRef.current = 0;
+      isConnectedRef.current = false;
       
       cleanupAudio();
       releaseWakeLock();
