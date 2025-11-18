@@ -259,7 +259,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       
       // Configurações específicas para mobile - otimizadas para streaming
       audio.crossOrigin = 'anonymous';
-      audio.preload = 'none';
+      audio.preload = 'true';
       audio.playsInline = true;
       
       // Configurações para iOS
