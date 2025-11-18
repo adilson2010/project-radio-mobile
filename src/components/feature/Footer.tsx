@@ -51,7 +51,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-yellow-100 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
-              A tua <b>Rádio Regggae!</b> Transmissão 24 horas com a melhor seleção musical.
+              A tua rádio reggae com transmissão 24 horas e com a melhor seleção jamaicana.
             </p>
           </div>
 
