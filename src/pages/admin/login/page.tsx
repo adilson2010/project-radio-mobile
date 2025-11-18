@@ -269,7 +269,7 @@ export default function AdminLogin() {
               Dicas de Acesso
             </h3>
             <ul className="text-xs text-blue-300 space-y-1">
-              <li>• Use o email: educ.adilsonlima@gmail.com</li>
+              <li>• Use o email: exemplo@exemplo.com</li>
               <li>• Configure uma senha de pelo menos 6 caracteres</li>
               <li>• Se não conseguir entrar, use a página de configuração</li>
               <li>• Você receberá um email de confirmação após o login</li>
