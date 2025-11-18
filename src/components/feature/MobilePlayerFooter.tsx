@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 interface MobilePlayerFooterRef {
@@ -30,7 +29,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   const isConnectedRef = useRef(false);
   const lastSuccessfulUrlRef = useRef(0);
   const connectionAttemptsRef = useRef(0);
-  const maxConnectionAttemptsRef = useRef(3);
+  const maxConnectionAttemptsRef = useRef(5);
 
   // URLs de streaming otimizadas para mobile
   const streamUrls = [
@@ -208,16 +207,13 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     if (audioRef.current) {
       const audio = audioRef.current;
       
-      // Pausar e limpar
-      audio.pause();
-      audio.src = '';
-      audio.load();
-      
-      // Remover todos os event listeners clonando o elemento
-      const newAudio = audio.cloneNode() as HTMLAudioElement;
-      if (audio.parentNode) {
-        audio.parentNode.replaceChild(newAudio, audio);
-        audioRef.current = newAudio;
+      try {
+        // Pausar e limpar
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+      } catch (error) {
+        console.log('Erro ao limpar áudio:', error);
       }
     }
   };
@@ -239,7 +235,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     // Verificar limite de tentativas de conexão
     if (connectionAttemptsRef.current >= maxConnectionAttemptsRef.current) {
       console.log('Limite de tentativas de conexão atingido');
-      setConnectionStatus('Erro - Clique em Play para tentar novamente');
+      setConnectionStatus('Erro - Toque em Play para tentar novamente');
       setIsLoading(false);
       setIsBuffering(false);
       connectionAttemptsRef.current = 0;
@@ -261,12 +257,12 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
 
       const audio = audioRef.current;
       
-      // Configurações específicas para mobile - otimizadas para streaming sem buffer
+      // Configurações específicas para mobile - otimizadas para streaming
       audio.crossOrigin = 'anonymous';
-      audio.preload = 'metadata'; // Mudança: metadata em vez de none para melhor streaming
+      audio.preload = 'none';
       audio.playsInline = true;
       
-      // Configurações anti-buffer para streaming
+      // Configurações para iOS
       if (isIOS()) {
         audio.setAttribute('webkit-playsinline', 'true');
         audio.setAttribute('playsinline', 'true');
@@ -279,7 +275,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       }
       
       const currentUrl = streamUrls[urlToTry];
-      console.log(`Tentando URL ${urlToTry + 1}/${streamUrls.length}: ${currentUrl}`);
+      console.log(`Tentando URL ${urlToTry + 1}/${streamUrls.length}`);
       
       // Configurar novo stream
       audio.src = currentUrl;
@@ -289,13 +285,13 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       const audioPromise = new Promise<boolean>((resolve, reject) => {
         let resolved = false;
         
-        // Timeout de 10 segundos para conexão (reduzido para melhor experiência)
+        // Timeout de 12 segundos para conexão
         const timeout = setTimeout(() => {
           if (!resolved) {
             resolved = true;
             reject(new Error('Timeout na conexão'));
           }
-        }, 10000);
+        }, 12000);
 
         const handleCanPlay = () => {
           if (!resolved) {
@@ -328,7 +324,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
             requestWakeLock();
             setupAdvancedMediaSession();
             
-            // Iniciar timer de escuta - CORRIGIDO
+            // Iniciar timer de escuta
             if (listeningTimerRef.current) {
               clearInterval(listeningTimerRef.current);
             }
@@ -354,10 +350,11 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
           }
         };
 
-        const handleError = () => {
+        const handleError = (e: Event) => {
           if (!resolved) {
             resolved = true;
             clearTimeout(timeout);
+            console.error('Erro no áudio:', e);
             reject(new Error('Erro no áudio'));
           }
         };
@@ -399,19 +396,19 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
         currentUrlIndexRef.current++;
         console.log(`Tentando próxima URL...`);
         
-        // Aguardar 1 segundo antes de tentar próxima URL (reduzido)
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Aguardar 1.5 segundos antes de tentar próxima URL
+        await new Promise(resolve => setTimeout(resolve, 1500));
         return initializeAudio();
       }
       
       // Se todas as URLs falharam, tentar retry limitado
-      if (retryCountRef.current < 1) { // Reduzido para 1 retry apenas
+      if (retryCountRef.current < 2) {
         retryCountRef.current++;
         currentUrlIndexRef.current = 0;
-        setConnectionStatus(`Reconectando... (${retryCountRef.current}/1)`);
-        console.log(`Retry ${retryCountRef.current}/1`);
+        setConnectionStatus(`Reconectando... (${retryCountRef.current}/2)`);
+        console.log(`Retry ${retryCountRef.current}/2`);
         
-        // Aguardar 2 segundos antes de retry (reduzido)
+        // Aguardar 2 segundos antes de retry
         await new Promise(resolve => setTimeout(resolve, 2000));
         return initializeAudio();
       }
@@ -419,7 +416,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       // Falha total
       console.error('Todas as tentativas falharam');
       stopPlayback();
-      setConnectionStatus('Erro - Clique em Play para tentar novamente');
+      setConnectionStatus('Erro - Toque em Play para tentar novamente');
       retryCountRef.current = 0;
       currentUrlIndexRef.current = 0;
       connectionAttemptsRef.current = 0;
@@ -449,7 +446,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       // Pausar
       audioRef.current.pause();
       stopPlayback();
-      setConnectionStatus('Pausado - Clique em Play para continuar');
+      setConnectionStatus('Pausado - Toque em Play para continuar');
     } else {
       // Reproduzir
       setIsLoading(true);
@@ -513,7 +510,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       cleanupAudio();
       releaseWakeLock();
       
-      await new Promise(resolve => setTimeout(resolve, 500)); // Reduzido para 500ms
+      await new Promise(resolve => setTimeout(resolve, 500));
       await initializeAudio();
     }
   };
@@ -633,7 +630,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     <>
       <audio 
         ref={audioRef} 
-        preload="metadata"
+        preload="none"
         playsInline
         crossOrigin="anonymous"
         controls={false}
@@ -727,11 +724,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                 <button
                   onClick={togglePlay}
                   disabled={networkStatus === 'offline' || isInitializingRef.current}
-                  className={`${
-                    isLoading || isBuffering || isInitializingRef.current
-                      ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
-                      : 'bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600'
-                  } disabled:opacity-50 text-white rounded-full w-20 h-20 flex items-center justify-center transition-all duration-200 shadow-2xl transform hover:scale-105 disabled:scale-100 whitespace-nowrap`}
+                  className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:opacity-50 text-white rounded-full w-20 h-20 flex items-center justify-center transition-all duration-200 shadow-2xl transform hover:scale-105 disabled:scale-100 whitespace-nowrap"
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
                   type="button"
                 >
@@ -845,11 +838,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                 <button
                   onClick={togglePlay}
                   disabled={networkStatus === 'offline' || isInitializingRef.current}
-                  className={`${
-                    isLoading || isBuffering || isInitializingRef.current
-                      ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
-                      : 'bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600'
-                  } disabled:opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 shadow-lg transform hover:scale-105 disabled:scale-100 whitespace-nowrap`}
+                  className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 shadow-lg transform hover:scale-105 disabled:scale-100 whitespace-nowrap"
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
                   type="button"
                 >
