@@ -51,7 +51,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-yellow-100 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
-              A tua <b>Rádio Regggae! </b> Transmissão 24 horas com a melhor seleção musical.
+              A tua <b>Rádio Regggae!</b> Transmissão 24 horas com a melhor seleção musical.
             </p>
           </div>
 
@@ -64,10 +64,6 @@ export default function Footer() {
             <p className="text-yellow-100 text-sm leading-relaxed mb-4">
               Desde 2010, a Ras Reggae Radio tem sido a voz autêntica do reggae no Brasil e no mundo. 
               Nossa missão é espalhar a mensagem de amor, paz e humildade através da música reggae.
-            </p>
-            <p className="text-yellow-100 text-sm leading-relaxed">
-              Com uma programação cuidadosamente selecionada, apresentamos desde os clássicos das decadas passadas 70,80,90 e anos atuais 2000, 
-              até os novos talentos do reggae contemporâneo.
             </p>
           </div>
 
