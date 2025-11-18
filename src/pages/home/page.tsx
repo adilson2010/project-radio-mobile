@@ -84,7 +84,7 @@ export default function Home() {
               Ras Reggae Radio
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90">
-              A melhor música reggae <b>ONLINE 24H!</b>
+              A melhor música reggae 24 horas por dia!
             </p>
             <p className="text-lg mb-12 opacity-80 max-w-2xl mx-auto">
               Conecte-se com a cultura <b>Reggae Autêntica</b>. Ouça os clássicos da música jamaicana e descubra sua essência Roots Reggae.
@@ -245,7 +245,7 @@ export default function Home() {
                 <h3 className="text-lg font-bold mb-2">Email</h3>
                 <p className="opacity-90 mb-3 text-sm">Envie sua mensagem</p>
                 <a 
-                  href="mailto:contato@rasreggaeradio.com" 
+                  href="#" 
                   className="text-yellow-300 hover:text-yellow-200 font-semibold transition-colors text-sm"
                 >
                   no-reply@rasreggaeradio.com
@@ -265,7 +265,7 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="text-yellow-300 hover:text-yellow-200 font-semibold transition-colors text-sm"
                 >
-                  (11) 99999-9999
+                  (00) 99999-9999
                 </a>
               </div>
 
