@@ -224,7 +224,7 @@ export default function Footer() {
         <div className="border-t border-yellow-600 pt-6 text-center">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-yellow-100 text-sm">
-              © 2024 Ras Reggae Radio. Todos os direitos reservados.
+              © 2010 - 2025 Ras Reggae Radio. Todos os direitos reservados.
             </p>
             <div className="flex items-center space-x-6">
               <span className="text-yellow-100 text-sm">Desde 2010 • Amor • Paz • Reggae</span>
