@@ -30,7 +30,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   const isConnectedRef = useRef(false);
   const lastSuccessfulUrlRef = useRef(0);
   const connectionAttemptsRef = useRef(0);
-  const maxConnectionAttemptsRef = useRef(5);
+  const maxConnectionAttemptsRef = useRef(3);
 
   // URLs de streaming otimizadas para mobile
   const streamUrls = [
@@ -239,7 +239,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     // Verificar limite de tentativas de conexão
     if (connectionAttemptsRef.current >= maxConnectionAttemptsRef.current) {
       console.log('Limite de tentativas de conexão atingido');
-      setConnectionStatus('Muitas tentativas - Clique em Play para tentar novamente');
+      setConnectionStatus('Erro - Clique em Play para tentar novamente');
       setIsLoading(false);
       setIsBuffering(false);
       connectionAttemptsRef.current = 0;
@@ -261,10 +261,16 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
 
       const audio = audioRef.current;
       
-      // Configurações específicas para mobile
+      // Configurações específicas para mobile - otimizadas para streaming sem buffer
       audio.crossOrigin = 'anonymous';
-      audio.preload = 'none';
+      audio.preload = 'metadata'; // Mudança: metadata em vez de none para melhor streaming
       audio.playsInline = true;
+      
+      // Configurações anti-buffer para streaming
+      if (isIOS()) {
+        audio.setAttribute('webkit-playsinline', 'true');
+        audio.setAttribute('playsinline', 'true');
+      }
       
       // Começar com a última URL que funcionou
       let urlToTry = lastSuccessfulUrlRef.current;
@@ -283,13 +289,13 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       const audioPromise = new Promise<boolean>((resolve, reject) => {
         let resolved = false;
         
-        // Timeout de 15 segundos para conexão
+        // Timeout de 10 segundos para conexão (reduzido para melhor experiência)
         const timeout = setTimeout(() => {
           if (!resolved) {
             resolved = true;
             reject(new Error('Timeout na conexão'));
           }
-        }, 15000);
+        }, 10000);
 
         const handleCanPlay = () => {
           if (!resolved) {
@@ -301,7 +307,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
             retryCountRef.current = 0;
             isConnectedRef.current = true;
             lastSuccessfulUrlRef.current = urlToTry;
-            connectionAttemptsRef.current = 0; // Reset contador de tentativas
+            connectionAttemptsRef.current = 0;
             resolve(true);
           }
         };
@@ -317,23 +323,28 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
             retryCountRef.current = 0;
             isConnectedRef.current = true;
             lastSuccessfulUrlRef.current = urlToTry;
-            connectionAttemptsRef.current = 0; // Reset contador de tentativas
+            connectionAttemptsRef.current = 0;
             
             requestWakeLock();
             setupAdvancedMediaSession();
             
+            // Iniciar timer de escuta - CORRIGIDO
             if (listeningTimerRef.current) {
               clearInterval(listeningTimerRef.current);
             }
             listeningTimerRef.current = setInterval(() => {
               setListeningTime(prev => {
                 const newTime = prev + 1;
-                if ('mediaSession' in navigator) {
-                  navigator.mediaSession.setPositionState({
-                    duration: Infinity,
-                    playbackRate: 1,
-                    position: newTime
-                  });
+                if ('mediaSession' in navigator && navigator.mediaSession) {
+                  try {
+                    navigator.mediaSession.setPositionState({
+                      duration: Infinity,
+                      playbackRate: 1,
+                      position: newTime
+                    });
+                  } catch (e) {
+                    console.log('Erro ao atualizar posição:', e);
+                  }
                 }
                 return newTime;
               });
@@ -388,20 +399,20 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
         currentUrlIndexRef.current++;
         console.log(`Tentando próxima URL...`);
         
-        // Aguardar 2 segundos antes de tentar próxima URL
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Aguardar 1 segundo antes de tentar próxima URL (reduzido)
+        await new Promise(resolve => setTimeout(resolve, 1000));
         return initializeAudio();
       }
       
       // Se todas as URLs falharam, tentar retry limitado
-      if (retryCountRef.current < 2) {
+      if (retryCountRef.current < 1) { // Reduzido para 1 retry apenas
         retryCountRef.current++;
-        currentUrlIndexRef.current = 0; // Reset para primeira URL
-        setConnectionStatus(`Reconectando... (${retryCountRef.current}/2)`);
-        console.log(`Retry ${retryCountRef.current}/2`);
+        currentUrlIndexRef.current = 0;
+        setConnectionStatus(`Reconectando... (${retryCountRef.current}/1)`);
+        console.log(`Retry ${retryCountRef.current}/1`);
         
-        // Aguardar 3 segundos antes de retry
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // Aguardar 2 segundos antes de retry (reduzido)
+        await new Promise(resolve => setTimeout(resolve, 2000));
         return initializeAudio();
       }
       
@@ -502,7 +513,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       cleanupAudio();
       releaseWakeLock();
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500)); // Reduzido para 500ms
       await initializeAudio();
     }
   };
@@ -622,7 +633,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     <>
       <audio 
         ref={audioRef} 
-        preload="none"
+        preload="metadata"
         playsInline
         crossOrigin="anonymous"
         controls={false}
@@ -718,9 +729,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                   disabled={networkStatus === 'offline' || isInitializingRef.current}
                   className={`${
                     isLoading || isBuffering || isInitializingRef.current
-                      ? 'bg-gray-500 hover:bg-gray-600'
-                      : isPlaying
-                      ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600'
+                      ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
                       : 'bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600'
                   } disabled:opacity-50 text-white rounded-full w-20 h-20 flex items-center justify-center transition-all duration-200 shadow-2xl transform hover:scale-105 disabled:scale-100 whitespace-nowrap`}
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
@@ -838,9 +847,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                   disabled={networkStatus === 'offline' || isInitializingRef.current}
                   className={`${
                     isLoading || isBuffering || isInitializingRef.current
-                      ? 'bg-gray-500 hover:bg-gray-600'
-                      : isPlaying
-                      ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600'
+                      ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
                       : 'bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600'
                   } disabled:opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 shadow-lg transform hover:scale-105 disabled:scale-100 whitespace-nowrap`}
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}

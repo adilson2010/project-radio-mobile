@@ -248,7 +248,7 @@ export default function Home() {
                   href="mailto:contato@rasreggaeradio.com" 
                   className="text-yellow-300 hover:text-yellow-200 font-semibold transition-colors text-sm"
                 >
-                  contato@rasreggaeradio.com
+                  no-reply@rasreggaeradio.com
                 </a>
               </div>
 
