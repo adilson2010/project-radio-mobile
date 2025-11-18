@@ -684,7 +684,7 @@ export default function RadioPlayer() {
               </div>
               <div className="flex items-center space-x-2">
                 <i className="ri-time-line text-green-600 w-5 h-5 flex items-center justify-center"></i>
-                <span className="font-medium">24/7 Online</span>
+                <span className="font-medium">Online 24h</span>
               </div>
               <div className="flex items-center space-x-2">
                 <i className={`ri-wifi-${networkStatus === 'online' ? '' : 'off-'}line text-green-600 w-5 h-5 flex items-center justify-center`}></i>
