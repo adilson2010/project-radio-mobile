@@ -158,7 +158,7 @@ export default function Home() {
                   Converse Conosco
                 </h2>
                 <p className="text-lg text-gray-600 mb-6">
-                  Participe da nossa comunidade! Chega junto em nosso bate papo Regueiro, peça suas músicas favoritas e compartilhe sua paixão pela música Reggae.
+                  Participe da nossa comunidade! Chega junto em nosso bate papo regueiro, peça suas músicas favoritas e compartilhe sua paixão pela música Reggae.
                 </p>
                 
                 {/* Benefícios do Chat */}
@@ -173,7 +173,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center space-x-3 text-gray-700">
                     <i className="ri-time-line text-orange-600 text-xl w-6 h-6 flex items-center justify-center"></i>
-                    <span>Moderação 24/7</span>
+                    <span>Moderação Online 24h</span>
                   </div>
                   <div className="flex items-center space-x-3 text-gray-700">
                     <i className="ri-smartphone-line text-orange-600 text-xl w-6 h-6 flex items-center justify-center"></i>
