@@ -653,7 +653,7 @@ export default function RadioPlayer() {
               aria-label="Reiniciar stream"
             >
               <i className="ri-refresh-line mr-2"></i>
-              Reiniciar Stream
+              Reiniciar Rádio
             </button>
 
             <button 
