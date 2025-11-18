@@ -287,7 +287,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
             
             setIsPlaying(true);
             setIsLoading(false);
-            setConnectionStatus('Transmissão AAC • Ao Vivo');
+            setConnectionStatus('A Sua Rádio Reggae • Ao Vivo');
             retryCountRef.current = 0;
             isConnectedRef.current = true;
             lastSuccessfulUrlRef.current = urlToTry;
@@ -369,7 +369,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       setConnectionStatus('Pausado - Toque em Play para continuar');
     } else {
       setIsLoading(true);
-      setConnectionStatus('Conectando ao stream...');
+      setConnectionStatus('Conectando ao rádio...');
       
       if (!isConnectedRef.current) {
         currentUrlIndexRef.current = lastSuccessfulUrlRef.current;
