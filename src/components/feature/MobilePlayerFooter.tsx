@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 interface MobilePlayerFooterRef {
@@ -75,10 +76,9 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     try {
       if ('wakeLock' in navigator && isPlaying && !wakeLockRef.current) {
         wakeLockRef.current = await navigator.wakeLock.request('screen');
-        console.log('Wake Lock ativado');
       }
     } catch (err) {
-      console.log('Wake Lock não suportado:', err);
+      // Silencioso - Wake Lock não é crítico
     }
   };
 
@@ -86,7 +86,45 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     if (wakeLockRef.current) {
       wakeLockRef.current.release();
       wakeLockRef.current = null;
-      console.log('Wake Lock liberado');
+    }
+  };
+
+  // Iniciar timer de escuta
+  const startListeningTimer = () => {
+    // Limpar timer anterior se existir
+    if (listeningTimerRef.current) {
+      clearInterval(listeningTimerRef.current);
+      listeningTimerRef.current = null;
+    }
+
+    // Iniciar novo timer
+    listeningTimerRef.current = setInterval(() => {
+      setListeningTime(prev => {
+        const newTime = prev + 1;
+        
+        // Atualizar Media Session se disponível
+        if ('mediaSession' in navigator && navigator.mediaSession) {
+          try {
+            navigator.mediaSession.setPositionState({
+              duration: Infinity,
+              playbackRate: 1,
+              position: newTime
+            });
+          } catch (e) {
+            // Silencioso
+          }
+        }
+        
+        return newTime;
+      });
+    }, 1000);
+  };
+
+  // Parar timer de escuta
+  const stopListeningTimer = () => {
+    if (listeningTimerRef.current) {
+      clearInterval(listeningTimerRef.current);
+      listeningTimerRef.current = null;
     }
   };
 
@@ -148,7 +186,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       if (isPlaying) {
         navigator.mediaSession.setPositionState({
           duration: Infinity,
-          playbackRate: 0,
+          playbackRate: 1,
           position: listeningTime
         });
       }
@@ -191,11 +229,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     setIsBuffering(false);
     isConnectedRef.current = false;
     releaseWakeLock();
-    
-    if (listeningTimerRef.current) {
-      clearInterval(listeningTimerRef.current);
-      listeningTimerRef.current = null;
-    }
+    stopListeningTimer();
     
     if ('mediaSession' in navigator) {
       navigator.mediaSession.playbackState = 'paused';
@@ -208,12 +242,11 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       const audio = audioRef.current;
       
       try {
-        // Pausar e limpar
         audio.pause();
         audio.removeAttribute('src');
         audio.load();
       } catch (error) {
-        console.log('Erro ao limpar áudio:', error);
+        // Silencioso
       }
     }
   };
@@ -222,19 +255,16 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   const initializeAudio = async () => {
     // Prevenir múltiplas inicializações simultâneas
     if (isInitializingRef.current) {
-      console.log('Já está inicializando, aguarde...');
       return false;
     }
 
     // Verificar se usuário já interagiu (necessário para iOS)
     if (!hasUserInteractedRef.current) {
-      console.log('Aguardando interação do usuário...');
       return false;
     }
 
     // Verificar limite de tentativas de conexão
     if (connectionAttemptsRef.current >= maxConnectionAttemptsRef.current) {
-      console.log('Limite de tentativas de conexão atingido');
       setConnectionStatus('Erro - Toque em Play para tentar novamente');
       setIsLoading(false);
       setIsBuffering(false);
@@ -247,7 +277,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
 
     try {
       if (!audioRef.current) {
-        console.error('Referência de áudio não encontrada');
         isInitializingRef.current = false;
         return false;
       }
@@ -259,7 +288,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       
       // Configurações específicas para mobile - otimizadas para streaming
       audio.crossOrigin = 'anonymous';
-      audio.preload = 'none';
+      audio.preload = 'metadata';
       audio.playsInline = true;
       
       // Configurações para iOS
@@ -275,7 +304,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       }
       
       const currentUrl = streamUrls[urlToTry];
-      console.log(`Tentando URL ${urlToTry + 1}/${streamUrls.length}`);
       
       // Configurar novo stream
       audio.src = currentUrl;
@@ -312,6 +340,8 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
           if (!resolved) {
             resolved = true;
             clearTimeout(timeout);
+            
+            // Atualizar estados de forma síncrona
             setIsPlaying(true);
             setIsLoading(false);
             setIsBuffering(false);
@@ -325,26 +355,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
             setupAdvancedMediaSession();
             
             // Iniciar timer de escuta
-            if (listeningTimerRef.current) {
-              clearInterval(listeningTimerRef.current);
-            }
-            listeningTimerRef.current = setInterval(() => {
-              setListeningTime(prev => {
-                const newTime = prev + 1;
-                if ('mediaSession' in navigator && navigator.mediaSession) {
-                  try {
-                    navigator.mediaSession.setPositionState({
-                      duration: Infinity,
-                      playbackRate: 1,
-                      position: newTime
-                    });
-                  } catch (e) {
-                    console.log('Erro ao atualizar posição:', e);
-                  }
-                }
-                return newTime;
-              });
-            }, 1000);
+            startListeningTimer();
 
             resolve(true);
           }
@@ -354,7 +365,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
           if (!resolved) {
             resolved = true;
             clearTimeout(timeout);
-            console.error('Erro no áudio:', e);
             reject(new Error('Erro no áudio'));
           }
         };
@@ -388,13 +398,11 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       isInitializingRef.current = false;
       return true;
     } catch (error) {
-      console.error('Erro ao inicializar áudio:', error);
       isInitializingRef.current = false;
       
       // Tentar próxima URL se disponível
       if (currentUrlIndexRef.current + 1 < streamUrls.length) {
         currentUrlIndexRef.current++;
-        console.log(`Tentando próxima URL...`);
         
         // Aguardar 1.5 segundos antes de tentar próxima URL
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -406,7 +414,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
         retryCountRef.current++;
         currentUrlIndexRef.current = 0;
         setConnectionStatus(`Reconectando... (${retryCountRef.current}/2)`);
-        console.log(`Retry ${retryCountRef.current}/2`);
         
         // Aguardar 2 segundos antes de retry
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -414,7 +421,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       }
       
       // Falha total
-      console.error('Todas as tentativas falharam');
       stopPlayback();
       setConnectionStatus('Erro - Toque em Play para tentar novamente');
       retryCountRef.current = 0;
@@ -509,6 +515,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       
       cleanupAudio();
       releaseWakeLock();
+      stopListeningTimer();
       
       await new Promise(resolve => setTimeout(resolve, 500));
       await initializeAudio();
@@ -542,7 +549,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
         }, 3000);
       }
     } catch (error) {
-      console.error('Erro ao compartilhar:', error);
+      // Silencioso
     }
   };
 
@@ -567,9 +574,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     return () => {
       cleanupNetwork();
       releaseWakeLock();
-      if (listeningTimerRef.current) {
-        clearInterval(listeningTimerRef.current);
-      }
+      stopListeningTimer();
       if (listenersTimerRef.current) {
         clearInterval(listenersTimerRef.current);
       }
@@ -630,7 +635,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     <>
       <audio 
         ref={audioRef} 
-        preload="none"
+        preload="metadata"
         playsInline
         crossOrigin="anonymous"
         controls={false}

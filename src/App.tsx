@@ -18,7 +18,7 @@ function App() {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <BrowserRouter>
+      <BrowserRouter basename={__BASE_PATH__}>
         <div className="App">
           <AppRoutes />
           <MobilePlayerFooter ref={mobilePlayerRef} />
