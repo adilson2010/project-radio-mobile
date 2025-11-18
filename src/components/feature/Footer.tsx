@@ -234,7 +234,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="text-yellow-200 hover:text-white text-sm font-semibold transition-colors"
               >
-                Powered by Restisteência Tech Roots
+                Powered by Ras Reggae
               </a>
             </div>
           </div>

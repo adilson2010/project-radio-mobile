@@ -162,8 +162,8 @@ export default function Header() {
                 Player
               </button>
               <Link 
-                to="/loja" 
-                onClick={() => handleNavigation('/loja')}
+                to="#" 
+                onClick={() => handleNavigation('#')}
                 className="text-white hover:text-yellow-200 transition-colors py-2 cursor-pointer font-medium"
               >
                 Loja
