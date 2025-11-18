@@ -51,7 +51,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-yellow-100 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
-              A tua rádio reggae com transmissão 24 horas e com a melhor seleção jamaicana.
+              A Tua Rádio Reggae Online 24 horas!
             </p>
           </div>
 
