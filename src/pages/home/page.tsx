@@ -84,7 +84,7 @@ export default function Home() {
               Ras Reggae Radio
             </h1>
             <p className="text-xl md:text-2xl mb-8 opacity-90">
-              A melhor música reggae <b>ONLINE!</b>
+              A melhor música reggae <b>ONLINE 24H!</b>
             </p>
             <p className="text-lg mb-12 opacity-80 max-w-2xl mx-auto">
               Conecte-se com a cultura <b>Reggae Autêntica</b>. Ouça os clássicos da música jamaicana e descubra sua essência Roots Reggae.

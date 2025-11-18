@@ -101,7 +101,7 @@ export default function Header() {
               Player
             </button>
             <Link 
-              to="/loja" 
+              to="#" 
               className="text-white hover:text-yellow-200 transition-colors cursor-pointer font-medium"
             >
               Loja
