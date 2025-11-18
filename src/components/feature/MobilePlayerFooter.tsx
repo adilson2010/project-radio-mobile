@@ -175,7 +175,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
 
       navigator.mediaSession.playbackState = isPlayingRef.current ? 'playing' : 'paused';
 
-      if (isPlayingRef.current) {
+      if (isPlayingRef.current && 'setPositionState' in navigator.mediaSession) {
         navigator.mediaSession.setPositionState({
           duration: Infinity,
           playbackRate: 1,
