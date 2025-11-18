@@ -148,7 +148,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       if (isPlaying) {
         navigator.mediaSession.setPositionState({
           duration: Infinity,
-          playbackRate: 1,
+          playbackRate: 0,
           position: listeningTime
         });
       }
@@ -259,7 +259,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       
       // Configurações específicas para mobile - otimizadas para streaming
       audio.crossOrigin = 'anonymous';
-      audio.preload = 'true';
+      audio.preload = 'none';
       audio.playsInline = true;
       
       // Configurações para iOS
