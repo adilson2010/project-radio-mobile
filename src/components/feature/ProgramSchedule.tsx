@@ -31,60 +31,60 @@ export default function ProgramSchedule() {
   // Programação completa da semana
   const allPrograms: Program[] = [
     // Domingo (0)
-    { id: 1, dayOfWeek: 0, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Roots Morning', dj: 'DJ Marley', description: 'Comece o dia com reggae clássico' },
-    { id: 2, dayOfWeek: 0, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Vibes', dj: 'DJ Rasta', description: 'Os melhores hits reggae' },
-    { id: 3, dayOfWeek: 0, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Session', dj: 'DJ Echo', description: 'Transmissão ao vivo com interação' },
-    { id: 4, dayOfWeek: 0, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Sunset Reggae', dj: 'DJ Marley', description: 'Reggae para o fim de tarde' },
-    { id: 5, dayOfWeek: 0, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Vibes', dj: 'DJ Rasta', description: 'Reggae roots para a noite' },
-    { id: 6, dayOfWeek: 0, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Midnight Dub', dj: 'DJ Echo', description: 'Dub e reggae instrumental' },
+    { id: 1, dayOfWeek: 0, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Roots Morning', dj: 'DJ Auto', description: 'Comece o dia com reggae clássico' },
+    { id: 2, dayOfWeek: 0, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Vibes', dj: 'DJ Auto', description: 'Os melhores hits reggae' },
+    { id: 3, dayOfWeek: 0, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Session', dj: 'DJ Auto', description: 'Transmissão ao vivo com interação' },
+    { id: 4, dayOfWeek: 0, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Sunset Reggae', dj: 'DJ Auto', description: 'Reggae para o fim de tarde' },
+    { id: 5, dayOfWeek: 0, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Vibes', dj: 'DJ Auto', description: 'Reggae roots para a noite' },
+    { id: 6, dayOfWeek: 0, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Midnight Dub', dj: 'DJ Auto', description: 'Dub e reggae instrumental' },
     
     // Segunda-feira (1)
-    { id: 7, dayOfWeek: 1, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Morning Roots', dj: 'DJ Marley', description: 'Energia reggae para começar a semana' },
-    { id: 8, dayOfWeek: 1, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Classics', dj: 'DJ Lion', description: 'Clássicos do reggae mundial' },
-    { id: 9, dayOfWeek: 1, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Afternoon Vibes', dj: 'DJ Rasta', description: 'Reggae para a tarde' },
-    { id: 10, dayOfWeek: 1, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Evening Session', dj: 'DJ Echo', description: 'Reggae ao vivo' },
-    { id: 11, dayOfWeek: 1, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Roots', dj: 'DJ Marley', description: 'Roots reggae para a noite' },
-    { id: 12, dayOfWeek: 1, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Late Night Dub', dj: 'DJ Lion', description: 'Dub e instrumental' },
+    { id: 7, dayOfWeek: 1, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Morning Roots', dj: 'DJ Auto', description: 'Energia reggae para começar a semana' },
+    { id: 8, dayOfWeek: 1, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Classics', dj: 'DJ Auto', description: 'Clássicos do reggae mundial' },
+    { id: 9, dayOfWeek: 1, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Afternoon Vibes', dj: 'DJ Auto', description: 'Reggae para a tarde' },
+    { id: 10, dayOfWeek: 1, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Evening Session', dj: 'DJ Auto', description: 'Reggae ao vivo' },
+    { id: 11, dayOfWeek: 1, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Roots', dj: 'DJ Auto', description: 'Roots reggae para a noite' },
+    { id: 12, dayOfWeek: 1, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Late Night Dub', dj: 'DJ Auto', description: 'Dub e instrumental' },
     
     // Terça-feira (2)
-    { id: 13, dayOfWeek: 2, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Roots Morning', dj: 'DJ Rasta', description: 'Reggae matinal' },
-    { id: 14, dayOfWeek: 2, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Power', dj: 'DJ Echo', description: 'Energia reggae' },
-    { id: 15, dayOfWeek: 2, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Afternoon', dj: 'DJ Marley', description: 'Transmissão ao vivo' },
-    { id: 16, dayOfWeek: 2, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Sunset Roots', dj: 'DJ Lion', description: 'Reggae roots' },
-    { id: 17, dayOfWeek: 2, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Session', dj: 'DJ Rasta', description: 'Sessão noturna' },
-    { id: 18, dayOfWeek: 2, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Midnight Reggae', dj: 'DJ Echo', description: 'Reggae da madrugada' },
+    { id: 13, dayOfWeek: 2, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Roots Morning', dj: 'DJ Auto', description: 'Reggae matinal' },
+    { id: 14, dayOfWeek: 2, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Power', dj: 'DJ Auto', description: 'Energia reggae' },
+    { id: 15, dayOfWeek: 2, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Afternoon', dj: 'DJ Auto', description: 'Transmissão ao vivo' },
+    { id: 16, dayOfWeek: 2, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Sunset Roots', dj: 'DJ Auto', description: 'Reggae roots' },
+    { id: 17, dayOfWeek: 2, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Session', dj: 'DJ Auto', description: 'Sessão noturna' },
+    { id: 18, dayOfWeek: 2, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Midnight Reggae', dj: 'DJ Auto', description: 'Reggae da madrugada' },
     
     // Quarta-feira (3)
-    { id: 19, dayOfWeek: 3, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Morning Vibes', dj: 'DJ Marley', description: 'Vibes matinais' },
-    { id: 20, dayOfWeek: 3, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Mix', dj: 'DJ Lion', description: 'Mix de reggae' },
-    { id: 21, dayOfWeek: 3, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Mix', dj: 'DJ Rasta', description: 'Mix ao vivo' },
-    { id: 22, dayOfWeek: 3, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Evening Roots', dj: 'DJ Echo', description: 'Roots da noite' },
-    { id: 23, dayOfWeek: 3, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Classics', dj: 'DJ Marley', description: 'Clássicos noturnos' },
-    { id: 24, dayOfWeek: 3, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Late Dub', dj: 'DJ Lion', description: 'Dub tardio' },
+    { id: 19, dayOfWeek: 3, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Morning Vibes', dj: 'DJ Auto', description: 'Vibes matinais' },
+    { id: 20, dayOfWeek: 3, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Mix', dj: 'DJ Auto', description: 'Mix de reggae' },
+    { id: 21, dayOfWeek: 3, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Mix', dj: 'DJ Auto', description: 'Mix ao vivo' },
+    { id: 22, dayOfWeek: 3, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Evening Roots', dj: 'DJ Auto', description: 'Roots da noite' },
+    { id: 23, dayOfWeek: 3, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Classics', dj: 'DJ Auto', description: 'Clássicos noturnos' },
+    { id: 24, dayOfWeek: 3, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Late Dub', dj: 'DJ Auto', description: 'Dub tardio' },
     
     // Quinta-feira (4)
-    { id: 25, dayOfWeek: 4, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Roots Wake Up', dj: 'DJ Rasta', description: 'Acorde com reggae' },
-    { id: 26, dayOfWeek: 4, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Hits', dj: 'DJ Echo', description: 'Sucessos do reggae' },
-    { id: 27, dayOfWeek: 4, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Hits', dj: 'DJ Marley', description: 'Hits ao vivo' },
-    { id: 28, dayOfWeek: 4, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Sunset Session', dj: 'DJ Lion', description: 'Sessão do pôr do sol' },
-    { id: 29, dayOfWeek: 4, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Reggae', dj: 'DJ Rasta', description: 'Reggae noturno' },
-    { id: 30, dayOfWeek: 4, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Midnight Vibes', dj: 'DJ Echo', description: 'Vibes da meia-noite' },
+    { id: 25, dayOfWeek: 4, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Roots Wake Up', dj: 'DJ Auto', description: 'Acorde com reggae' },
+    { id: 26, dayOfWeek: 4, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Hits', dj: 'DJ Auto', description: 'Sucessos do reggae' },
+    { id: 27, dayOfWeek: 4, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Hits', dj: 'DJ Auto', description: 'Hits ao vivo' },
+    { id: 28, dayOfWeek: 4, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Sunset Session', dj: 'DJ Auto', description: 'Sessão do pôr do sol' },
+    { id: 29, dayOfWeek: 4, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Reggae', dj: 'DJ Auto', description: 'Reggae noturno' },
+    { id: 30, dayOfWeek: 4, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Midnight Vibes', dj: 'DJ Auto', description: 'Vibes da meia-noite' },
     
     // Sexta-feira (5)
-    { id: 31, dayOfWeek: 5, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Friday Morning', dj: 'DJ Marley', description: 'Sexta-feira reggae' },
-    { id: 32, dayOfWeek: 5, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Party', dj: 'DJ Lion', description: 'Festa reggae' },
-    { id: 33, dayOfWeek: 5, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Party', dj: 'DJ Rasta', description: 'Festa ao vivo' },
-    { id: 34, dayOfWeek: 5, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Friday Night', dj: 'DJ Echo', description: 'Noite de sexta' },
-    { id: 35, dayOfWeek: 5, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Party', dj: 'DJ Marley', description: 'Festa da noite' },
-    { id: 36, dayOfWeek: 5, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Late Night Party', dj: 'DJ Lion', description: 'Festa madrugada' },
+    { id: 31, dayOfWeek: 5, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Friday Morning', dj: 'DJ Auto', description: 'Sexta-feira reggae' },
+    { id: 32, dayOfWeek: 5, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Reggae Party', dj: 'DJ Auto', description: 'Festa reggae' },
+    { id: 33, dayOfWeek: 5, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Party', dj: 'DJ Auto', description: 'Festa ao vivo' },
+    { id: 34, dayOfWeek: 5, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Friday Night', dj: 'DJ Auto', description: 'Noite de sexta' },
+    { id: 35, dayOfWeek: 5, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Party', dj: 'DJ Auto', description: 'Festa da noite' },
+    { id: 36, dayOfWeek: 5, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Late Night Party', dj: 'DJ Auto', description: 'Festa madrugada' },
     
     // Sábado (6)
-    { id: 37, dayOfWeek: 6, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Saturday Morning', dj: 'DJ Rasta', description: 'Manhã de sábado' },
-    { id: 38, dayOfWeek: 6, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Weekend Vibes', dj: 'DJ Echo', description: 'Vibes de fim de semana' },
-    { id: 39, dayOfWeek: 6, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Weekend', dj: 'DJ Marley', description: 'Fim de semana ao vivo' },
-    { id: 40, dayOfWeek: 6, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Saturday Night', dj: 'DJ Lion', description: 'Noite de sábado' },
-    { id: 41, dayOfWeek: 6, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Special', dj: 'DJ Rasta', description: 'Especial noturno' },
-    { id: 42, dayOfWeek: 6, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Midnight Special', dj: 'DJ Echo', description: 'Especial da meia-noite' }
+    { id: 37, dayOfWeek: 6, time: '06:00', startHour: 6, startMinute: 0, endHour: 9, endMinute: 0, title: 'Saturday Morning', dj: 'DJ Auto', description: 'Manhã de sábado' },
+    { id: 38, dayOfWeek: 6, time: '09:00', startHour: 9, startMinute: 0, endHour: 14, endMinute: 0, title: 'Weekend Vibes', dj: 'DJ Auto', description: 'Vibes de fim de semana' },
+    { id: 39, dayOfWeek: 6, time: '14:00', startHour: 14, startMinute: 0, endHour: 18, endMinute: 0, title: 'Live Weekend', dj: 'DJ Auto', description: 'Fim de semana ao vivo' },
+    { id: 40, dayOfWeek: 6, time: '18:00', startHour: 18, startMinute: 0, endHour: 21, endMinute: 0, title: 'Saturday Night', dj: 'DJ Auto', description: 'Noite de sábado' },
+    { id: 41, dayOfWeek: 6, time: '21:00', startHour: 21, startMinute: 0, endHour: 0, endMinute: 0, title: 'Night Special', dj: 'DJ Auto', description: 'Especial noturno' },
+    { id: 42, dayOfWeek: 6, time: '00:00', startHour: 0, startMinute: 0, endHour: 6, endMinute: 0, title: 'Midnight Special', dj: 'DJ Auto', description: 'Especial da meia-noite' }
   ];
 
   // Verificar se um programa está ao vivo agora
@@ -238,7 +238,7 @@ export default function ProgramSchedule() {
         <div className="flex items-center justify-center space-x-2 text-gray-500">
           <i className="ri-information-line text-green-600"></i>
           <p className="text-sm">
-            Programação atualizada em tempo real • Transmissão 24/7
+            Programação atualizada em tempo real • Transmissão Online 24h
           </p>
         </div>
         <div className="text-center mt-2">
