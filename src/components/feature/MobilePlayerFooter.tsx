@@ -14,8 +14,8 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   const [currentSong, setCurrentSong] = useState('Transmissão ao Vivo');
   const [currentArtist, setCurrentArtist] = useState('Ras Reggae Radio');
   const audioRef = useRef<HTMLAudioElement>(null);
-  const listeningTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const listenersTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const listeningTimerRef = useRef<number | null>(null);
+  const listenersTimerRef = useRef<number | null>(null);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const currentUrlIndexRef = useRef(0);
   const retryCountRef = useRef(0);
