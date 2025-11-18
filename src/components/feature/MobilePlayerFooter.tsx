@@ -271,7 +271,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
 
         const handleCanPlay = () => {
           if (!resolved && isPlaying) {
-            setConnectionStatus('Transmissão AAC • Ao Vivo');
+            setConnectionStatus('A Sua Rádio Reggae • Ao Vivo');
             setupAdvancedMediaSession();
             retryCountRef.current = 0;
             isConnectedRef.current = true;
