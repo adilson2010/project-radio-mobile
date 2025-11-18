@@ -369,7 +369,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       setConnectionStatus('Pausado - Toque em Play para continuar');
     } else {
       setIsLoading(true);
-      setConnectionStatus('Conectando rádio...');
+      setConnectionStatus('Conectando a rádio...');
       
       if (!isConnectedRef.current) {
         currentUrlIndexRef.current = lastSuccessfulUrlRef.current;
