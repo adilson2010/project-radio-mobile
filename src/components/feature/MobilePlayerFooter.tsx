@@ -11,11 +11,9 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   const [listeners, setListeners] = useState(1247);
   const [listeningTime, setListeningTime] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [currentSong, setCurrentSong] = useState('Transmissão ao Vivo');
-  const [currentArtist, setCurrentArtist] = useState('Ras Reggae Radio');
   const audioRef = useRef<HTMLAudioElement>(null);
-  const listeningTimerRef = useRef<number | null>(null);
-  const listenersTimerRef = useRef<number | null>(null);
+  const listeningTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const listenersTimerRef = useRef<NodeJS.Timeout | null>(null);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const currentUrlIndexRef = useRef(0);
   const retryCountRef = useRef(0);
@@ -25,7 +23,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   const lastSuccessfulUrlRef = useRef(0);
   const connectionAttemptsRef = useRef(0);
   const maxConnectionAttemptsRef = useRef(3);
-  const isPlayingRef = useRef(false);
 
   // URLs de streaming otimizadas para mobile
   const streamUrls = [
@@ -69,7 +66,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   // Wake Lock para manter tela ativa durante reprodução
   const requestWakeLock = async () => {
     try {
-      if ('wakeLock' in navigator && isPlayingRef.current && !wakeLockRef.current) {
+      if ('wakeLock' in navigator && isPlaying && !wakeLockRef.current) {
         wakeLockRef.current = await navigator.wakeLock.request('screen');
       }
     } catch (err) {
@@ -124,8 +121,8 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
   const setupAdvancedMediaSession = () => {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: currentSong,
-        artist: currentArtist,
+        title: 'Transmissão ao Vivo',
+        artist: 'Ras Reggae Radio',
         album: 'A Voz Autêntica do Reggae',
         artwork: [
           { 
@@ -162,20 +159,20 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       });
 
       navigator.mediaSession.setActionHandler('play', () => {
-        if (!isPlayingRef.current) togglePlay();
+        if (!isPlaying) togglePlay();
       });
 
       navigator.mediaSession.setActionHandler('pause', () => {
-        if (isPlayingRef.current) togglePlay();
+        if (isPlaying) togglePlay();
       });
 
       navigator.mediaSession.setActionHandler('stop', () => {
-        if (isPlayingRef.current) togglePlay();
+        if (isPlaying) togglePlay();
       });
 
-      navigator.mediaSession.playbackState = isPlayingRef.current ? 'playing' : 'paused';
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
 
-      if (isPlayingRef.current && 'setPositionState' in navigator.mediaSession) {
+      if (isPlaying) {
         navigator.mediaSession.setPositionState({
           duration: Infinity,
           playbackRate: 1,
@@ -190,7 +187,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     setIsPlaying(false);
     setIsLoading(false);
     isConnectedRef.current = false;
-    isPlayingRef.current = false;
     releaseWakeLock();
     stopListeningTimer();
     
@@ -274,7 +270,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
         }, 10000);
 
         const handleCanPlay = () => {
-          if (!resolved && isPlayingRef.current) {
+          if (!resolved && isPlaying) {
             setConnectionStatus('Transmissão AAC • Ao Vivo');
             setupAdvancedMediaSession();
             retryCountRef.current = 0;
@@ -294,7 +290,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
             setConnectionStatus('Transmissão AAC • Ao Vivo');
             retryCountRef.current = 0;
             isConnectedRef.current = true;
-            isPlayingRef.current = true;
             lastSuccessfulUrlRef.current = urlToTry;
             connectionAttemptsRef.current = 0;
             
@@ -368,14 +363,13 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
 
     if (!audioRef.current) return;
 
-    if (isPlayingRef.current) {
+    if (isPlaying) {
       audioRef.current.pause();
       stopPlayback();
       setConnectionStatus('Pausado - Toque em Play para continuar');
     } else {
       setIsLoading(true);
       setConnectionStatus('Conectando ao stream...');
-      isPlayingRef.current = true;
       
       if (!isConnectedRef.current) {
         currentUrlIndexRef.current = lastSuccessfulUrlRef.current;
@@ -434,7 +428,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
         await navigator.clipboard.writeText(shareText);
         setConnectionStatus('Link copiado! Cole no seu app favorito');
         setTimeout(() => {
-          setConnectionStatus(isPlayingRef.current ? 'Transmissão AAC • Ao Vivo' : 'Clique em Play para ouvir');
+          setConnectionStatus(isPlaying ? 'Transmissão AAC • Ao Vivo' : 'Clique em Play para ouvir');
         }, 3000);
       }
     } catch (error) {
@@ -461,7 +455,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     const updateNetworkStatus = () => {
       const online = navigator.onLine;
       
-      if (!online && isPlayingRef.current) {
+      if (!online && isPlaying) {
         setConnectionStatus('Sem conexão com a internet');
         stopPlayback();
       }
@@ -471,7 +465,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     window.addEventListener('offline', updateNetworkStatus);
     
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && isPlayingRef.current) {
+      if (!document.hidden && isPlaying) {
         setupAdvancedMediaSession();
       }
     });
@@ -495,7 +489,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
     const updateListeners = () => {
       const baseListeners = 1200;
       const variation = Math.floor(Math.random() * 100) - 50;
-      const timeBonus = isPlayingRef.current ? Math.floor(Math.random() * 50) : 0;
+      const timeBonus = isPlaying ? Math.floor(Math.random() * 50) : 0;
       setListeners(Math.max(baseListeners + variation + timeBonus, 800));
     };
 
@@ -507,28 +501,6 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
         clearInterval(listenersTimerRef.current);
       }
     };
-  }, []);
-
-  // Atualizar informações da música
-  useEffect(() => {
-    const songs = [
-      { title: 'Transmissão ao Vivo', artist: 'Ras Reggae Radio' },
-      { title: 'Roots Rock Reggae', artist: 'Bob Marley' },
-      { title: 'One Love', artist: 'Bob Marley' },
-      { title: 'No Woman No Cry', artist: 'Bob Marley' }
-    ];
-
-    if (isPlayingRef.current) {
-      const updateSong = () => {
-        const randomSong = songs[Math.floor(Math.random() * songs.length)];
-        setCurrentSong(randomSong.title);
-        setCurrentArtist(randomSong.artist);
-        setupAdvancedMediaSession();
-      };
-
-      const interval = setInterval(updateSong, Math.random() * 120000 + 180000);
-      return () => clearInterval(interval);
-    }
   }, [isPlaying]);
 
   // Não mostrar em desktop
@@ -571,7 +543,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
             </div>
             <button 
               onClick={handleExpandToggle}
-              className="text-white hover:text-yellow-300 transition-colors bg-black/20 rounded-full w-10 h-10 flex items-center justify-center"
+              className="text-white hover:text-yellow-300 transition-colors bg-black/20 rounded-full w-10 h-10 flex items-center justify-center cursor-pointer"
               aria-label="Fechar player expandido"
               type="button"
             >
@@ -592,8 +564,8 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
             </div>
 
             <div className="mb-6 text-center">
-              <h3 className="text-2xl font-bold text-white mb-2">{currentSong}</h3>
-              <p className="text-lg text-yellow-200 mb-1">{currentArtist}</p>
+              <h3 className="text-2xl font-bold text-white mb-2">Transmissão ao Vivo</h3>
+              <p className="text-lg text-yellow-200 mb-1">Ras Reggae Radio</p>
               <p className="text-sm text-green-200">A Voz Autêntica do Reggae</p>
             </div>
 
@@ -623,21 +595,21 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                 <button
                   onClick={restartStream}
                   disabled={isInitializingRef.current || isLoading}
-                  className="bg-black/30 hover:bg-black/50 disabled:opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 border border-green-600"
+                  className="bg-black/30 hover:bg-black/50 disabled:opacity-50 text-white rounded-full w-14 h-14 flex items-center justify-center transition-all duration-200 border border-green-600 cursor-pointer"
                   aria-label="Reiniciar stream"
                   type="button"
                 >
-                  <i className="ri-refresh-line text-xl"></i>
+                  <i className="ri-refresh-line text-2xl"></i>
                 </button>
 
                 <button
                   onClick={togglePlay}
                   disabled={isInitializingRef.current}
-                  className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:opacity-50 text-white rounded-full w-20 h-20 flex items-center justify-center transition-all duration-200 shadow-2xl transform hover:scale-105 disabled:scale-100 whitespace-nowrap"
+                  className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:opacity-50 text-white rounded-full w-20 h-20 flex items-center justify-center transition-all duration-200 shadow-2xl transform hover:scale-105 disabled:scale-100 whitespace-nowrap cursor-pointer"
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
                   type="button"
                 >
-                  {isLoading || isInitializingRef.current ? (
+                  {isLoading ? (
                     <i className="ri-loader-4-line animate-spin text-3xl"></i>
                   ) : isPlaying ? (
                     <i className="ri-pause-fill text-3xl"></i>
@@ -648,11 +620,11 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
 
                 <button
                   onClick={shareToCarSystem}
-                  className="bg-black/30 hover:bg-black/50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 border border-green-600"
+                  className="bg-black/30 hover:bg-black/50 text-white rounded-full w-14 h-14 flex items-center justify-center transition-all duration-200 border border-green-600 cursor-pointer"
                   aria-label="Compartilhar"
                   type="button"
                 >
-                  <i className="ri-share-line text-xl"></i>
+                  <i className="ri-share-line text-2xl"></i>
                 </button>
               </div>
             </div>
@@ -703,8 +675,8 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-bold text-sm truncate">{currentSong}</p>
-                  <p className="text-green-200 text-xs truncate">{currentArtist}</p>
+                  <p className="text-white font-bold text-sm truncate">Transmissão ao Vivo</p>
+                  <p className="text-green-200 text-xs truncate">Ras Reggae Radio</p>
                   <div className="flex items-center space-x-2 mt-1">
                     {isLoading && <i className="ri-loader-4-line animate-spin text-yellow-400 text-xs"></i>}
                     {isPlaying && !isLoading && <i className="ri-radio-line text-green-400 text-xs"></i>}
@@ -717,11 +689,11 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                 <button
                   onClick={togglePlay}
                   disabled={isInitializingRef.current}
-                  className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 shadow-lg transform hover:scale-105 disabled:scale-100 whitespace-nowrap"
+                  className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 shadow-lg transform hover:scale-105 disabled:scale-100 whitespace-nowrap cursor-pointer"
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
                   type="button"
                 >
-                  {isLoading || isInitializingRef.current ? (
+                  {isLoading ? (
                     <i className="ri-loader-4-line animate-spin text-lg"></i>
                   ) : isPlaying ? (
                     <i className="ri-pause-fill text-lg"></i>
@@ -732,7 +704,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
 
                 <button
                   onClick={handleExpandToggle}
-                  className="text-white hover:text-yellow-300 transition-colors bg-black/20 rounded-full w-10 h-10 flex items-center justify-center"
+                  className="text-white hover:text-yellow-300 transition-colors bg-black/20 rounded-full w-10 h-10 flex items-center justify-center cursor-pointer"
                   aria-label="Expandir player"
                   type="button"
                 >
