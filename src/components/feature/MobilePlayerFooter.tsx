@@ -416,7 +416,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
       if (navigator.share) {
         await navigator.share({
           title: 'Ras Reggae Radio - Ao Vivo',
-          text: 'Escutando a melhor rádio reggae online! 🎵',
+          text: 'Escutando a melhor rádio reggae online! 🎵 Ouça você também @rasreggaeradio',
           url: window.location.href
         });
         return;
