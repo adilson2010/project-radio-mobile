@@ -682,9 +682,9 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
             <div className="mb-8 w-full max-w-md">
               <div className="bg-green-800/50 rounded-2xl px-6 py-4 mb-4 border border-green-600">
                 <p className="text-white text-base font-semibold flex items-center justify-center space-x-2">
-                  {isBuffering && <i className="ri-loader-4-line animate-spin text-yellow-400"></i>}
+                  {(isBuffering || isLoading) && <i className="ri-loader-4-line animate-spin text-yellow-400"></i>}
                   {networkStatus === 'offline' && <i className="ri-wifi-off-line text-red-400"></i>}
-                  {isPlaying && !isBuffering && <i className="ri-radio-line text-green-400"></i>}
+                  {isPlaying && !isBuffering && !isLoading && <i className="ri-radio-line text-green-400"></i>}
                   <span>{connectionStatus}</span>
                 </p>
               </div>
@@ -705,7 +705,7 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
               <div className="flex items-center justify-center space-x-6">
                 <button
                   onClick={restartStream}
-                  disabled={isInitializingRef.current}
+                  disabled={isInitializingRef.current || isLoading}
                   className="bg-black/30 hover:bg-black/50 disabled:opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 border border-green-600"
                   aria-label="Reiniciar stream"
                   type="button"
@@ -715,12 +715,18 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
 
                 <button
                   onClick={togglePlay}
-                  disabled={isLoading || networkStatus === 'offline' || isInitializingRef.current}
-                  className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-full w-20 h-20 flex items-center justify-center transition-all duration-200 shadow-2xl transform hover:scale-105 disabled:scale-100"
+                  disabled={networkStatus === 'offline' || isInitializingRef.current}
+                  className={`${
+                    isLoading || isBuffering || isInitializingRef.current
+                      ? 'bg-gray-500 hover:bg-gray-600'
+                      : isPlaying
+                      ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600'
+                      : 'bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600'
+                  } disabled:opacity-50 text-white rounded-full w-20 h-20 flex items-center justify-center transition-all duration-200 shadow-2xl transform hover:scale-105 disabled:scale-100 whitespace-nowrap`}
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
                   type="button"
                 >
-                  {isLoading || isBuffering ? (
+                  {isLoading || isBuffering || isInitializingRef.current ? (
                     <i className="ri-loader-4-line animate-spin text-3xl"></i>
                   ) : isPlaying ? (
                     <i className="ri-pause-fill text-3xl"></i>
@@ -818,9 +824,9 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
                   <p className="text-white font-bold text-sm truncate">{currentSong}</p>
                   <p className="text-green-200 text-xs truncate">{currentArtist}</p>
                   <div className="flex items-center space-x-2 mt-1">
-                    {isBuffering && <i className="ri-loader-4-line animate-spin text-yellow-400 text-xs"></i>}
+                    {(isBuffering || isLoading) && <i className="ri-loader-4-line animate-spin text-yellow-400 text-xs"></i>}
                     {networkStatus === 'offline' && <i className="ri-wifi-off-line text-red-400 text-xs"></i>}
-                    {isPlaying && !isBuffering && <i className="ri-radio-line text-green-400 text-xs"></i>}
+                    {isPlaying && !isBuffering && !isLoading && <i className="ri-radio-line text-green-400 text-xs"></i>}
                     <span className="text-green-200 text-xs">{connectionStatus}</span>
                   </div>
                 </div>
@@ -829,12 +835,18 @@ const MobilePlayerFooter = forwardRef<MobilePlayerFooterRef>((_, ref) => {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={togglePlay}
-                  disabled={isLoading || networkStatus === 'offline' || isInitializingRef.current}
-                  className="bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600 disabled:from-gray-500 disabled:to-gray-600 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 shadow-lg transform hover:scale-105 disabled:scale-100"
+                  disabled={networkStatus === 'offline' || isInitializingRef.current}
+                  className={`${
+                    isLoading || isBuffering || isInitializingRef.current
+                      ? 'bg-gray-500 hover:bg-gray-600'
+                      : isPlaying
+                      ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600'
+                      : 'bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-600 hover:to-yellow-600'
+                  } disabled:opacity-50 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 shadow-lg transform hover:scale-105 disabled:scale-100 whitespace-nowrap`}
                   aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
                   type="button"
                 >
-                  {isLoading || isBuffering ? (
+                  {isLoading || isBuffering || isInitializingRef.current ? (
                     <i className="ri-loader-4-line animate-spin text-lg"></i>
                   ) : isPlaying ? (
                     <i className="ri-pause-fill text-lg"></i>
